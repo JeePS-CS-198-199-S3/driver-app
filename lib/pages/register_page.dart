@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:transitrack_driver/components/button.dart';
 
+import '../components/square_tile.dart';
 import '../components/text_field.dart';
+import '../services/auth_service.dart';
 import '../style/constants.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -57,9 +59,6 @@ class _RegisterPageState extends State<RegisterPage> {
       }
 
 
-
-
-
     } on FirebaseAuthException catch (e) {
 
       // pop loading circle
@@ -102,11 +101,11 @@ class _RegisterPageState extends State<RegisterPage> {
 
                   const Icon(
                     Icons.emoji_transportation,
-                    size: 100,
+                    size: 75,
                     color: Colors.white,
                   ),
 
-                  const SizedBox(height: Constants.defaultPadding*3),
+                  const SizedBox(height: Constants.defaultPadding*2),
 
                   const Text(
                     "Let's create an account for you!",
@@ -115,7 +114,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                   ),
 
-                  const SizedBox(height: Constants.defaultPadding*3),
+                  const SizedBox(height: Constants.defaultPadding*2),
 
                   InputTextField(controller: emailController, hintText: "Email", obscureText: false),
 
@@ -132,6 +131,38 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(height: Constants.defaultPadding*2),
 
                   Button(onTap: signUserUp, text: "Sign Up",),
+
+                  const SizedBox(height: Constants.defaultPadding*2.5),
+
+                  const Row(
+                    children: [
+                      Expanded(
+                        child: Divider(
+                          thickness: 0.5,
+                          color: Colors.white,
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 10.0),
+                        child: Text(
+                          "Or register with",
+                          style: TextStyle(
+                            color: Colors.white
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Divider(
+                          thickness: 0.5,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: Constants.defaultPadding*2.5),
+
+                  SquareTile(imagePath: 'lib/images/google.png', onTap: () => AuthService().signInWithGoogle()),
 
                   const SizedBox(height: Constants.defaultPadding*2),
 
