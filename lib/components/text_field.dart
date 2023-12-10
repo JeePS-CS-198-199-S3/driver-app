@@ -21,20 +21,21 @@ class InputTextField extends StatelessWidget {
       obscureText: obscureText,
       decoration: InputDecoration(
         enabledBorder: const OutlineInputBorder(
-            borderSide: BorderSide(
-                color: Colors.white
-            )
+          borderSide: BorderSide(
+              color: Colors.white
+          ),
         ),
         focusedBorder: const OutlineInputBorder(
-            borderSide: BorderSide(
-                color: Constants.primaryColor
-            )
+          borderSide: BorderSide(
+              color: Constants.primaryColor
+          )
         ),
         fillColor: Constants.secondaryColor,
         filled: true,
         hintText: hintText,
-        hintStyle: TextStyle(color: Colors.white)
+        hintStyle: const TextStyle(color: Colors.white),
       ),
+      style: const TextStyle(color: Colors.white),
     );
   }
 }
