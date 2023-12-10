@@ -6,41 +6,59 @@ import 'package:transitrack_driver/components/button.dart';
 import '../components/text_field.dart';
 import '../style/constants.dart';
 
-class LoginPage extends StatefulWidget {
+class RegisterPage extends StatefulWidget {
   final Function()? onTap;
-  const LoginPage({super.key, required this.onTap});
+  const RegisterPage({super.key, required this.onTap});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _RegisterPageState extends State<RegisterPage> {
   // text editing controllers
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
 
   // sign user in method
-  void signUserIn() async {
+  void signUserUp() async {
 
     // show loading circle
     showDialog(
-      context: context,
-      builder: (context) {
-        return const Center(
-          child: CircularProgressIndicator()
-        );
-      }
+        context: context,
+        builder: (context) {
+          return const Center(
+              child: CircularProgressIndicator()
+          );
+        }
     );
 
-    // try sign in
+    // try sign up
     try{
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: emailController.text,
-          password: passwordController.text
-      );
 
-      // pop loading circle
-      Navigator.pop(context);
+      // check if password is confirmed
+      if (passwordController.text == confirmPasswordController.text) {
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+            email: emailController.text,
+            password: passwordController.text
+        );
+
+        // pop loading circle
+        Navigator.pop(context);
+
+      } else {
+
+        // pop loading circle
+        Navigator.pop(context);
+
+        // password dont match
+        errorMessage("Passwords don't match!");
+
+      }
+
+
+
+
 
     } on FirebaseAuthException catch (e) {
 
@@ -52,20 +70,20 @@ class _LoginPageState extends State<LoginPage> {
 
   void errorMessage(String message) {
     showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: Constants.bgColor,
-          title: Center(
-            child: Text(
-              message,
-              style: const TextStyle(
-                color: Colors.white
-              ),
-            )
-          )
-        );
-      }
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+              backgroundColor: Constants.bgColor,
+              title: Center(
+                  child: Text(
+                    message,
+                    style: const TextStyle(
+                        color: Colors.white
+                    ),
+                  )
+              )
+          );
+        }
     );
   }
 
@@ -81,60 +99,54 @@ class _LoginPageState extends State<LoginPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-              
+
                   const Icon(
                     Icons.emoji_transportation,
                     size: 100,
                     color: Colors.white,
                   ),
-              
+
                   const SizedBox(height: Constants.defaultPadding*3),
-              
+
                   const Text(
-                    "Welcome to Transitrack Driver's App!",
+                    "Let's create an account for you!",
                     style: TextStyle(
-                      color: Colors.white
+                        color: Colors.white
                     ),
                   ),
-              
+
                   const SizedBox(height: Constants.defaultPadding*3),
-              
+
                   InputTextField(controller: emailController, hintText: "Email", obscureText: false),
-              
+
                   const SizedBox(height: Constants.defaultPadding),
-              
+
                   InputTextField(controller: passwordController, hintText: "Password", obscureText: true),
-              
+
+                  const SizedBox(height: Constants.defaultPadding),
+
+                  InputTextField(controller: confirmPasswordController, hintText: "Confirm Password", obscureText: true),
+
                   const SizedBox(height: Constants.defaultPadding/2),
-              
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Text(
-                        "Forgot Password?",
-                        style: TextStyle(color: Colors.grey[600]),
-                      ),
-                    ],
-                  ),
-              
+
                   const SizedBox(height: Constants.defaultPadding*2),
-              
-                  Button(onTap: signUserIn, text: "Sign In",),
-              
+
+                  Button(onTap: signUserUp, text: "Sign Up",),
+
                   const SizedBox(height: Constants.defaultPadding*2),
-              
+
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Text(
-                        'Not a member?',
+                        'Already have an account?',
                         style: TextStyle(color: Colors.white),
                       ),
-                      const SizedBox(width: 4),
+                      SizedBox(width: 4),
                       GestureDetector(
                         onTap: widget.onTap,
                         child: const Text(
-                          'Register now',
+                          'Login now',
                           style: TextStyle(color: Constants.primaryColor, fontWeight: FontWeight.bold),
                         ),
                       )

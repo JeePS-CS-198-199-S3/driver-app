@@ -5,8 +5,9 @@ import '../style/constants.dart';
 class Button extends StatelessWidget {
 
   final Function()? onTap;
+  final String text;
 
-  const Button({super.key, required this.onTap});
+  const Button({super.key, required this.onTap, required this.text});
 
   @override
   Widget build(BuildContext context) {
@@ -17,12 +18,12 @@ class Button extends StatelessWidget {
           color: Constants.primaryColor,
           borderRadius: BorderRadius.circular(8)
         ),
-        child: const Center(
+        child: Center(
           child: Padding(
-            padding: EdgeInsets.symmetric(vertical: Constants.defaultPadding),
+            padding: const EdgeInsets.symmetric(vertical: Constants.defaultPadding),
             child: Text(
-              "Sign In",
-              style: TextStyle(
+              text,
+              style: const TextStyle(
                 color: Constants.bgColor,
                 fontWeight: FontWeight.bold,
                 fontSize: 16
