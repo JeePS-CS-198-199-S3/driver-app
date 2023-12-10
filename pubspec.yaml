@@ -39,6 +39,8 @@ dependencies:
   firebase_auth: ^4.15.2
   google_sign_in: ^6.2.0
   google_nav_bar: ^5.0.6
+  location: ^5.0.3
+  latlng: ^1.0.0
 
 dev_dependencies:
   flutter_test:

@@ -11,11 +11,11 @@ class BottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.all(25),
+      margin: const EdgeInsets.only(left: 25, right: 25, bottom: 15),
       child: GNav(
         onTabChange: (value) => onTabChange!(value),
-        color: Constants.bgColor,
-        mainAxisAlignment: MainAxisAlignment.center,
+        color: Colors.white,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         activeColor: Colors.white,
         tabBackgroundColor: Constants.secondaryColor,
         tabBorderRadius: 24,
@@ -30,6 +30,10 @@ class BottomNavBar extends StatelessWidget {
         GButton(
           icon: Icons.directions_bus,
           text: 'Jeeps',
+        ),
+        GButton(
+          icon: Icons.map,
+          text: 'Map',
         ),
       ]),
     );
