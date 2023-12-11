@@ -19,9 +19,20 @@ class JeepneyPage extends StatefulWidget {
 
 class _JeepneyPageState extends State<JeepneyPage> {
   final user = FirebaseAuth.instance.currentUser!;
+  String data = 'Initial Data';
 
-  void rideJeep(Jeep jeep){
+  Future<void> fetchData() async {
+    // Simulate fetching data from an API or other source
+    await Future.delayed(Duration(seconds: 2));
+    // Update the data
+    setState(() {
+      data = 'New Data';
+    });
+  }
 
+  Future<void> rideJeep(String email, Jeep newJeep) async {
+    await updateJeepDriving(email, newJeep.id);
+    fetchData();
   }
 
   @override
@@ -47,6 +58,7 @@ class _JeepneyPageState extends State<JeepneyPage> {
               } else {
                 // If the data is available, display the driver information
                 Driver driver = snapshot.data!;
+
                 return FutureBuilder<Jeep?>(
                   future: getJeepById(driver.jeepDriving),
                   builder: (context, snapshot) {
@@ -58,10 +70,7 @@ class _JeepneyPageState extends State<JeepneyPage> {
                         // If there is an error, display an error message
                         return Center(child: Text('Error: ${snapshot.error}'));
                       } else {
-                        // If the data is available, display the Jeep information
-                        Jeep jeep = snapshot.data!;
-
-                        route = jeep.routeId;
+                        route = snapshot.data!.routeId;
                       }
                     }
 
@@ -94,7 +103,7 @@ class _JeepneyPageState extends State<JeepneyPage> {
                                     Jeep jeep = jeeps[index];
                                     return JeepTile(
                                       jeep: jeep,
-                                      onPressed: () => rideJeep(jeep),
+                                      onPressed: () => rideJeep(driver.email, jeep),
                                     );
                                   },
                                 );

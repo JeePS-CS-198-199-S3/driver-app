@@ -58,3 +58,28 @@ Future<Jeep?> getJeepById(String jeepId) async {
     return null;
   }
 }
+
+Future<void> updateJeepDriving(String email, String newJeepDriving) async {
+  try {
+    QuerySnapshot<Map<String, dynamic>> querySnapshot = await FirebaseFirestore.instance
+        .collection('drivers')
+        .where('email', isEqualTo: email)
+        .limit(1)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      String documentId = querySnapshot.docs.first.id;
+
+      await FirebaseFirestore.instance
+          .collection('drivers')
+          .doc(documentId)
+          .update({'jeepDriving': newJeepDriving});
+
+      print('Jeep driving attribute updated successfully');
+    } else {
+      print('No document found with email: $email');
+    }
+  } catch (e) {
+    print('Error updating jeep driving attribute: $e');
+  }
+}
