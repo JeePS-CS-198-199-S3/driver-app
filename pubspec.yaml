@@ -42,6 +42,7 @@ dependencies:
   location: ^5.0.3
   cloud_firestore: ^4.13.5
   awesome_dialog: ^3.1.0
+  shimmer_effect: ^1.0.4
 
 dev_dependencies:
   flutter_test:

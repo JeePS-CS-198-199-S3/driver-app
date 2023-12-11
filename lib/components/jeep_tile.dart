@@ -27,7 +27,7 @@ class JeepTile extends StatelessWidget {
               .then((querySnapshot) => querySnapshot.docs.isNotEmpty ? querySnapshot.docs.first : null),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const CircularProgressIndicator();
+              return const SizedBox(height: 70);
             } else if (snapshot.hasError) {
               return Text('Error: ${snapshot.error}');
             } else if (snapshot.data == null) {
