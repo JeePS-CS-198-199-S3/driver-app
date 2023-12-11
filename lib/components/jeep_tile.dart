@@ -49,7 +49,7 @@ class JeepTile extends StatelessWidget {
                     'lib/images/ikot_front.png',
                     height: 40
                 ),
-                enabled: false
+                onTap: onPressed,
               );
             }
           }

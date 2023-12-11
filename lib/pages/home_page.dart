@@ -15,7 +15,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-
   void signUserOut() {
     FirebaseAuth.instance.signOut();
   }
@@ -32,13 +31,13 @@ class _HomePageState extends State<HomePage> {
   // pages
   final List<Widget> pages = [
     // Dashboard
-    DashboardPage(),
+    const DashboardPage(),
 
     // Jeepney List Page
-    JeepneyPage(),
+    const JeepneyPage(),
 
     // Maps Page
-    MapPage()
+    const MapPage()
   ];
 
   @override
@@ -46,15 +45,37 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       backgroundColor: Constants.bgColor,
       appBar: AppBar(
-        actions: [
-          IconButton(
-            onPressed: signUserOut,
-            icon: const Icon(Icons.logout)
-          )
-        ],
+        backgroundColor: Constants.bgColor,
+        iconTheme: IconThemeData(color: Colors.white),
       ),
       bottomNavigationBar: BottomNavBar(
         onTabChange: (index) => navigateBottomBar(index),
+      ),
+      drawer: Drawer(
+        backgroundColor: Constants.bgColor,
+        child: SingleChildScrollView(
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(Constants.defaultPadding),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  SizedBox(height: Constants.defaultPadding*3),
+
+                  Icon(Icons.directions_bus, size: 150, color: Colors.white),
+
+                  SizedBox(height: Constants.defaultPadding*3),
+
+                  ListTile(
+                    leading: const Icon(Icons.logout, color: Colors.white,),
+                    title: Text("Logout", style: TextStyle(color: Colors.white),),
+                    onTap: signUserOut,
+                  )
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
       body: pages[selectedIndex]
     );

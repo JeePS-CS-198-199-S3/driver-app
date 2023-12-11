@@ -41,6 +41,7 @@ dependencies:
   google_nav_bar: ^5.0.6
   location: ^5.0.3
   cloud_firestore: ^4.13.5
+  awesome_dialog: ^3.1.0
 
 dev_dependencies:
   flutter_test:

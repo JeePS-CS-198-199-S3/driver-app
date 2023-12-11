@@ -17,7 +17,7 @@ class _DashboardPageState extends State<DashboardPage> {
     return SafeArea(
       child: Center(
         child: Padding(
-          padding: const EdgeInsets.all(Constants.defaultPadding),
+          padding: const EdgeInsets.only(left: Constants.defaultPadding, right: Constants.defaultPadding, bottom: Constants.defaultPadding),
           child: Column(
             children: [
               Text(
