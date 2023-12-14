@@ -9,6 +9,7 @@ class Jeep {
   final GeoPoint location;
   final Timestamp timestamp;
   final double bearing;
+  final bool isOperating;
 
   Jeep({
     required this.id,
@@ -19,6 +20,7 @@ class Jeep {
     required this.location,
     required this.timestamp,
     required this.bearing,
+    required this.isOperating
   });
 
   factory Jeep.fromSnapshot(QueryDocumentSnapshot<Object?> snapshot) {
@@ -32,16 +34,18 @@ class Jeep {
     GeoPoint location = data['location'];
     Timestamp timestamp  = data['timestamp'];
     double bearing = data['bearing'] as double;
+    bool isOperating = data['is_active'];
 
     return Jeep(
-        id: id,
-        routeId: routeId,
-        passengerCount: passengerCount,
-        maxCapacity: maxCapacity,
-        speed: speed,
-        location: location,
-        timestamp: timestamp,
-        bearing: bearing,
+      id: id,
+      routeId: routeId,
+      passengerCount: passengerCount,
+      maxCapacity: maxCapacity,
+      speed: speed,
+      location: location,
+      timestamp: timestamp,
+      bearing: bearing,
+      isOperating: isOperating
     );
   }
 }

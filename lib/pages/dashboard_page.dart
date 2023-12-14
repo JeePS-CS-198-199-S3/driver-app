@@ -1,5 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:transitrack_driver/services/database_manager.dart';
+import '../components/jeepney_page_loader.dart';
+import '../components/loaded_dashboard_page.dart';
+import '../models/driver_model.dart';
+import '../models/jeep_model.dart';
+import '../models/routes.dart';
 import '../style/constants.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -18,157 +25,41 @@ class _DashboardPageState extends State<DashboardPage> {
       child: Center(
         child: Padding(
           padding: const EdgeInsets.only(left: Constants.defaultPadding, right: Constants.defaultPadding, bottom: Constants.defaultPadding),
-          child: Column(
-            children: [
-              Text(
-                "Logged in as ${user.email}",
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14
-                )
-              ),
-
-              const SizedBox(height: Constants.defaultPadding*4),
-
-              Text(
-                  "4/16",
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 75,
-                    fontWeight: FontWeight.bold
-                  )
-              ),
-              Text(
-                  "passengers",
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 20
-                  )
-              ),
-
-              const SizedBox(height: Constants.defaultPadding*4),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      height: 100,
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Colors.white,
-                          width: 2
-                        ),
-                        borderRadius: BorderRadius.circular(24),
-                        color: Colors.green[900]
-                      ),
-                      child: Icon(
-                        Icons.add,
-                        color: Colors.white,
-                        size: 30,
-                      ),
-                    ),
-                  ),
-
-                 const SizedBox(width: Constants.defaultPadding),
-
-                  Expanded(
-                    child: Container(
-                      height: 100,
-                      decoration: BoxDecoration(
-                          border: Border.all(
-                              color: Colors.white,
-                              width: 2
-                          ),
-                          borderRadius: BorderRadius.circular(24),
-                          color: Colors.red[900]
-                      ),
-                      child: Icon(
-                        Icons.remove,
-                        color: Colors.white,
-                        size: 30,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: Constants.defaultPadding),
-
-              Expanded(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Container(
-                        padding: EdgeInsets.all(15),
-                        decoration: BoxDecoration(
-                          color: Constants.secondaryColor,
-                          borderRadius: BorderRadius.circular(24)
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("Plate Number: ABC123", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                            Row(
-                              children: [
-                                Text("Route: Ikot", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                                SizedBox(width: 5),
-                                Icon(Icons.circle, color: Colors.yellow, size:13)
-                              ],
-                            ),
-                            Text("Fare: PHP 10.00", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: Constants.defaultPadding),
-                    Column(
-                      children: [
-                        Expanded(
-                          child: Container(
-                              padding: EdgeInsets.all(15),
-                              decoration: BoxDecoration(
-                                  color: Constants.secondaryColor,
-                                  borderRadius: BorderRadius.circular(24)
-                              ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text("Operate", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                                  Stack(children: [
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        color: Constants.bgColor,
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      child: SizedBox(width: 60, height: 30),
-                                    ),
-                                    Icon(Icons.circle, color: Colors.green, size: 30),
-                                  ]),
-                                ],
-                              )
-                          ),
-                        ),
-                        SizedBox(height: Constants.defaultPadding),
-                        Expanded(
-                          child: Container(
-                              padding: EdgeInsets.all(15),
-                              decoration: BoxDecoration(
-                                  color: Colors.red[700],
-                                  borderRadius: BorderRadius.circular(24)
-                              ),
-                              child: Center(child: Text("SOS!", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 30))),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
+          child: FutureBuilder<Driver?>(
+            future: getDriverByEmail(user.email!),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                // While the Future is still running, show a loading indicator
+                return const JeepneyPageLoader();
+              } else if (snapshot.hasError) {
+                // If there is an error, display an error message
+                return Center(child: Text('Error: ${snapshot.error}'));
+              } else if (!snapshot.hasData || snapshot.data == null) {
+                // If no data is available, display a message indicating that the driver was not found
+                return Center(child: Text('Driver not found with email: ${user.email}'));
+              } else {
+                Driver driver = snapshot.data!;
+                return FutureBuilder<Jeep?>(
+                  future: getJeepById(driver.jeepDriving),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      // While the Future is still running, show a loading indicator
+                      return const JeepneyPageLoader();
+                    } else if (snapshot.hasError || snapshot.data == null) {
+                      // If there is an error, display an error message
+                      return Center(child: Text('Error: ${snapshot.error}'));
+                    } else {
+                      return LoadedDashboardPage(user: user, jeep: snapshot.data!);
+                    }
+                  },
+                );
+              }
+            },
           ),
         ),
       )
     );
   }
 }
+
+
