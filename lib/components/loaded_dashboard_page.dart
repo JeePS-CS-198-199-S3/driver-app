@@ -24,11 +24,11 @@ class _LoadedDashboardPageState extends State<LoadedDashboardPage> {
   late int _routeId;
   late int _passengerCount;
   late int _maxCapacity;
-  late double _speed;
   late GeoPoint _location;
   late double _bearing;
   late bool _isOperating;
   late Timer _timer;
+  final updateInterval = 3;
 
   // for location
   late LocationData _locationData;
@@ -59,15 +59,24 @@ class _LoadedDashboardPageState extends State<LoadedDashboardPage> {
       // Update the attributes of the document
       DocumentSnapshot document = querySnapshot.docs.first;
       if (_isOperating) {
-        jeepsCollection.doc(document.id).update({
-          'passenger_count': _passengerCount,
-          'slots_remaining': _maxCapacity-_passengerCount,
-          'timestamp':  FieldValue.serverTimestamp(),
-          'is_active': _isOperating,
-          'location': GeoPoint(_locationData.latitude!, _locationData.longitude!),
-          'speed': _locationData.speed,
-          'bearing': _locationData.heading
-        });
+        if (_locationData.heading != 0) {
+          jeepsCollection.doc(document.id).update({
+            'passenger_count': _passengerCount,
+            'slots_remaining': _maxCapacity-_passengerCount,
+            'timestamp':  FieldValue.serverTimestamp(),
+            'is_active': _isOperating,
+            'location': GeoPoint(_locationData.latitude!, _locationData.longitude!),
+            'bearing': _locationData.heading
+          });
+        } else {
+          jeepsCollection.doc(document.id).update({
+            'passenger_count': _passengerCount,
+            'slots_remaining': _maxCapacity-_passengerCount,
+            'timestamp':  FieldValue.serverTimestamp(),
+            'is_active': _isOperating,
+            'location': GeoPoint(_locationData.latitude!, _locationData.longitude!)
+          });
+        }
       } else {
         jeepsCollection.doc(document.id).update({
           'is_active': _isOperating
@@ -94,14 +103,13 @@ class _LoadedDashboardPageState extends State<LoadedDashboardPage> {
     _routeId = widget.jeep.routeId;
     _passengerCount = widget.jeep.passengerCount;
     _maxCapacity = widget.jeep.maxCapacity;
-    _speed = widget.jeep.speed;
     _location = widget.jeep.location;
     _bearing = widget.jeep.bearing;
     _isOperating = widget.jeep.isOperating;
 
     super.initState();
     _getLocation();
-    _timer = Timer.periodic(const Duration(seconds: 4), (Timer t) => updateFirestore(_id));
+    _timer = Timer.periodic(Duration(seconds: updateInterval), (Timer t) => updateFirestore(_id));
   }
 
   @override
