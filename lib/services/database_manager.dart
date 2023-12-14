@@ -3,6 +3,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/driver_model.dart';
 import '../models/jeep_model.dart';
 
+List<String> jeepFrontImg = [
+  'lib/images/ikot_front.png',
+  'lib/images/toki_front.png',
+  'lib/images/katip_front.png',
+  'lib/images/philcoa_front.png',
+  'lib/images/sm_front.png',
+];
+
 Future<List<Jeep>> getJeepsFromFirestore(int route) async {
   if (route != -1){
     QuerySnapshot<Map<String, dynamic>> snapshot =
@@ -12,6 +20,23 @@ Future<List<Jeep>> getJeepsFromFirestore(int route) async {
     QuerySnapshot<Map<String, dynamic>> snapshot =
     await FirebaseFirestore.instance.collection('jeeps_realtime').get();
     return snapshot.docs.map((doc) => Jeep.fromSnapshot(doc)).toList();
+  }
+}
+
+Future<List<Driver>> getDrivers() async {
+  try {
+    QuerySnapshot<Map<String, dynamic>> querySnapshot = await FirebaseFirestore.instance
+        .collection('drivers') // Replace with your collection name
+        .get();
+
+    // Convert the QuerySnapshot into a List<Driver>
+    List<Driver> drivers = querySnapshot.docs.map((doc) => Driver.fromSnapshot(doc)).toList();
+
+    return drivers;
+  } catch (e) {
+    // Handle errors here
+    print("Error fetching drivers: $e");
+    return [];
   }
 }
 

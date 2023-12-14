@@ -3,15 +3,17 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:location/location.dart';
 
 import '../models/jeep_model.dart';
 import '../models/routes.dart';
+import '../services/location_service.dart';
 import '../style/constants.dart';
 
 class LoadedDashboardPage extends StatefulWidget {
-  User user;
-  Jeep jeep;
-  LoadedDashboardPage({super.key, required this.user, required this.jeep});
+  final User user;
+  final Jeep jeep;
+  const LoadedDashboardPage({super.key, required this.user, required this.jeep});
 
   @override
   State<LoadedDashboardPage> createState() => _LoadedDashboardPageState();
@@ -24,15 +26,19 @@ class _LoadedDashboardPageState extends State<LoadedDashboardPage> {
   late int _maxCapacity;
   late double _speed;
   late GeoPoint _location;
-  late Timestamp _timestamp;
   late double _bearing;
   late bool _isOperating;
   late Timer _timer;
 
+  // for location
+  late LocationData _locationData;
+
   void addPassenger(){
-    setState(() {
-      _passengerCount++;
-    });
+    if(_passengerCount < _maxCapacity) {
+      setState(() {
+        _passengerCount++;
+      });
+    }
   }
 
   void removePassenger(){
@@ -44,8 +50,8 @@ class _LoadedDashboardPageState extends State<LoadedDashboardPage> {
   }
 
   void updateFirestore(String deviceId) async {
+    _getLocation();
     CollectionReference jeepsCollection = FirebaseFirestore.instance.collection('jeeps_realtime');
-
     // Query for the document with the specified device_id
     QuerySnapshot querySnapshot = await jeepsCollection.where('device_id', isEqualTo: deviceId).get();
 
@@ -57,7 +63,10 @@ class _LoadedDashboardPageState extends State<LoadedDashboardPage> {
           'passenger_count': _passengerCount,
           'slots_remaining': _maxCapacity-_passengerCount,
           'timestamp':  FieldValue.serverTimestamp(),
-          'is_active': _isOperating
+          'is_active': _isOperating,
+          'location': GeoPoint(_locationData.latitude!, _locationData.longitude!),
+          'speed': _locationData.speed,
+          'bearing': _locationData.heading
         });
       } else {
         jeepsCollection.doc(document.id).update({
@@ -66,6 +75,15 @@ class _LoadedDashboardPageState extends State<LoadedDashboardPage> {
       }
     } else {
       print('Document with device_id $deviceId not found.');
+    }
+  }
+
+  Future<void> _getLocation() async {
+    try {
+      _locationData = await LocationService().getLocation();
+    } catch (e) {
+      print('Error getting location: $e');
+      rethrow;
     }
   }
 
@@ -78,12 +96,12 @@ class _LoadedDashboardPageState extends State<LoadedDashboardPage> {
     _maxCapacity = widget.jeep.maxCapacity;
     _speed = widget.jeep.speed;
     _location = widget.jeep.location;
-    _timestamp = widget.jeep.timestamp;
     _bearing = widget.jeep.bearing;
     _isOperating = widget.jeep.isOperating;
 
     super.initState();
-    _timer = Timer.periodic(const Duration(seconds: 5), (Timer t) => updateFirestore(_id));
+    _getLocation();
+    _timer = Timer.periodic(const Duration(seconds: 4), (Timer t) => updateFirestore(_id));
   }
 
   @override
@@ -230,10 +248,10 @@ class _LoadedDashboardPageState extends State<LoadedDashboardPage> {
                         )
                     ),
                   ),
-                  SizedBox(height: Constants.defaultPadding),
+                  const SizedBox(height: Constants.defaultPadding),
                   Expanded(
                     child: Container(
-                      padding: EdgeInsets.all(10),
+                      padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
                           color: Colors.red[900]?.withOpacity(0.4),
                           borderRadius: BorderRadius.circular(24)

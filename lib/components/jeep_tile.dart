@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../models/driver_model.dart';
 import '../models/jeep_model.dart';
+import '../services/database_manager.dart';
 import '../style/constants.dart';
 
 class JeepTile extends StatelessWidget {
@@ -35,7 +36,7 @@ class JeepTile extends StatelessWidget {
                 title: Text(jeep.id, style: const TextStyle(color: Colors.white)),
                 subtitle: Text('Vacant, Capacity: ${jeep.maxCapacity}', style: TextStyle(color: Colors.grey[400])),
                 leading: Image.asset(
-                    'lib/images/ikot_front.png',
+                    jeepFrontImg[jeep.routeId],
                     height: 40
                 ),
                 onTap: onPressed,
