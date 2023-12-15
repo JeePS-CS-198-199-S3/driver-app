@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:transitrack_driver/services/database_manager.dart';
@@ -6,7 +5,6 @@ import '../components/jeepney_page_loader.dart';
 import '../components/loaded_dashboard_page.dart';
 import '../models/driver_model.dart';
 import '../models/jeep_model.dart';
-import '../models/routes.dart';
 import '../style/constants.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -49,7 +47,7 @@ class _DashboardPageState extends State<DashboardPage> {
                       // If there is an error, display an error message
                       return Center(child: Text('Error: ${snapshot.error}'));
                     } else {
-                      return LoadedDashboardPage(user: user, jeep: snapshot.data!);
+                      return LoadedDashboardPage(driver: driver, jeep: snapshot.data!);
                     }
                   },
                 );
