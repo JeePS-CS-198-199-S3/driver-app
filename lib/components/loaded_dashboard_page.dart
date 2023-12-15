@@ -29,6 +29,7 @@ class _LoadedDashboardPageState extends State<LoadedDashboardPage> {
   late bool _serviceEnabled;
   late PermissionStatus _permissionGranted;
   late LocationData? _locationData;
+  late StreamSubscription<LocationData> locationSubscription;
 
   void addPassenger(){
     if(_passengerCount < widget.jeep.maxCapacity) {
@@ -125,7 +126,7 @@ class _LoadedDashboardPageState extends State<LoadedDashboardPage> {
   }
 
   void _startLocationTracking() {
-    location.onLocationChanged.listen((LocationData currentLocation) {
+    locationSubscription = location.onLocationChanged.listen((LocationData currentLocation) {
       setState(() {
         _locationData = currentLocation;
       });
@@ -146,6 +147,7 @@ class _LoadedDashboardPageState extends State<LoadedDashboardPage> {
   @override
   void dispose() {
     _timer.cancel(); // Cancel the timer when the widget is disposed
+    locationSubscription.cancel();
     super.dispose();
   }
 

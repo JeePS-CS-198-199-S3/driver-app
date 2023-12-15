@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-// import 'package:mapbox_gl/mapbox_gl.dart';
+import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 
 import '../services/mapbox.dart';
+import '../style/constants.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -11,26 +12,27 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
-  // MapboxMap? mapboxMap;
-  //
-  // _onMapCreated(MapboxMap mapboxMap) {
-  //   this.mapboxMap = mapboxMap;
-  // }
+  MapboxMap? mapboxMap;
+
+  _onMapCreated(MapboxMap mapboxMap) {
+    this.mapboxMap = mapboxMap;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Text(
-       "Map"
+    return Scaffold(
+      body: MapWidget(
+        resourceOptions: ResourceOptions(
+          accessToken: accessToken
+        ),
+        onMapCreated: _onMapCreated,
+        styleUri: mapStyle,
+        cameraOptions: CameraOptions(
+          center: Point(coordinates: Position(14.655072, 121.068578)).toJson(),
+          padding: MbxEdgeInsets(top: Constants.defaultPadding, left: Constants.defaultPadding, bottom: Constants.defaultPadding, right: Constants.defaultPadding),
+          zoom: 20.0
+        ),
       )
-      // body: MapboxMap(
-      //   accessToken: "pk.eyJ1IjoiemVkZWMiLCJhIjoiY2xoZzdidjc1MDIxMDNsbnpocmloZXczeSJ9.qsTTfBC6ZB9ncP2rvbCnIw",
-      //   styleString: 'mapbox://styles/zedec/clhg7iztv00gq01rh5efqhzz5',
-      //   initialCameraPosition: const CameraPosition(
-      //     target: LatLng(14.653836, 121.068427),
-      //     zoom: 15
-      //   ),
-      // )
     );
   }
 }

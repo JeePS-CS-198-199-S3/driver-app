@@ -44,6 +44,7 @@ dependencies:
   awesome_dialog: ^3.1.0
   shimmer_effect: ^1.0.4
   permission_handler: ^11.1.0
+  mapbox_maps_flutter: ^0.5.1
 
 dev_dependencies:
   flutter_test:
