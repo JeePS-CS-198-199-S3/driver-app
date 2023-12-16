@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:mapbox_gl/mapbox_gl.dart';
 
 class DriverEmergency {
   final GeoPoint location;
@@ -26,4 +27,11 @@ class DriverEmergency {
       routeId: routeId
     );
   }
+}
+
+class DriverEmergencyCircle {
+  final DriverEmergency driverEmergency;
+  final CircleOptions circleOptions;
+
+  DriverEmergencyCircle({required this.driverEmergency, required this.circleOptions});
 }

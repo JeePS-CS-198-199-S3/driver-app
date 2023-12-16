@@ -20,7 +20,7 @@ class _MapPageState extends State<MapPage> {
   late Timer _timer;
   late StreamSubscription driverEmergencySubscription;
   final CollectionReference driverEmergencyCollection = FirebaseFirestore.instance.collection('driver_emergency');
-  List<DriverEmergency> emergencies = [];
+  List<DriverEmergencyCircle> emergencies = [];
 
   _onMapCreated(MapboxMapController controller) {
     _mapController = controller;
@@ -29,34 +29,37 @@ class _MapPageState extends State<MapPage> {
   void listenToEmergencies() {
     driverEmergencySubscription = driverEmergencyCollection.snapshots().listen((QuerySnapshot snapshot) {
       setState(() {
-        emergencies = snapshot.docs.map((doc) => DriverEmergency.fromSnapshot(doc)).toList();
+        emergencies = snapshot.docs.map((doc) {
+          DriverEmergency driverEmergency = DriverEmergency.fromSnapshot(doc);
+          CircleOptions driverEmergencyCircle = CircleOptions(
+              geometry: LatLng(driverEmergency.location.latitude, driverEmergency.location.longitude),
+              circleColor: '#F44336',
+              circleRadius: 5.0,
+              circleOpacity: 0.5
+          );
+          return DriverEmergencyCircle(driverEmergency: driverEmergency, circleOptions: driverEmergencyCircle);
+        }).toList();
       });
     });
   }
 
   void updateMapWithFilteredEmergencies() {
     // Filter emergencies based on the timestamp
-    List<DriverEmergency> filteredEmergencies = emergencies
-        .where((emergency) =>
-    DateTime.now().difference(emergency.timestamp.toDate()).inSeconds < sosLifespan)
+    emergencies = emergencies
+        .where((emergency) => DateTime.now().difference(emergency.driverEmergency.timestamp.toDate()).inSeconds < sosLifespan)
         .toList();
 
     // Update MapboxMap with the filtered emergencies
-    updateMap(filteredEmergencies);
+    updateMap();
   }
 
-  void updateMap(List<DriverEmergency> emergencies) {
+  void updateMap() {
     // Clear existing map markers
     _mapController.clearCircles();
 
     // Add red circles for each emergency
-    for (DriverEmergency emergency in emergencies) {
-      _mapController.addCircle(CircleOptions(
-        geometry: LatLng(emergency.location.latitude, emergency.location.longitude),
-        circleColor: '#F44336',
-        circleRadius: 5.0,
-        circleOpacity: 0.5
-      ));
+    for (DriverEmergencyCircle emergency in emergencies) {
+      _mapController.addCircle(emergency.circleOptions);
     }
   }
 
