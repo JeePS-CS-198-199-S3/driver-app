@@ -76,13 +76,13 @@ class _JeepneyPageState extends State<JeepneyPage> {
     return RefreshIndicator(
       onRefresh: () => _refresh(),
       child: SafeArea(
-        child: currentDriver == null
-            ? CircularProgressIndicator()
-            : Padding(
+        child: Padding(
           padding: const EdgeInsets.only(left: Constants.defaultPadding, right: Constants.defaultPadding, bottom: Constants.defaultPadding),
           child: SizedBox(
               width: double.maxFinite,
-              child: Column(
+              child: currentDriver == null
+                  ? const Center(child: CircularProgressIndicator(),)
+                  : Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
@@ -98,7 +98,18 @@ class _JeepneyPageState extends State<JeepneyPage> {
                       itemCount: jeepList.length,
                       itemBuilder: (context, index) {
                         Jeep jeep = jeepList[index]!;
+
+                        String driver = "Vacant";
+
+                        for (int i = 0; i < driverList.length; i++) {
+                          if (driverList[i]!.jeepDriving == jeep.id) {
+                            driver = driverList[i]!.name;
+                            break;
+                          }
+                        }
+
                         return JeepTile(
+                          driver: driver,
                             jeep: jeep,
                             onPressed: () {
                               if (jeep.id == currentDriver!.jeepDriving) {

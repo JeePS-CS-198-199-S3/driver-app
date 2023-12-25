@@ -18,6 +18,4 @@ class Constants {
   static const bgColor = Color(0xFF212332);
 
   static const defaultPadding = 16.0;
-
-  static const routeColor = [Color(0xFFFFC107), Color(0xFFF57F17), Color(0xFFC62828), Color(0xFF388E3C), Color(0xFF1565C0)];
 }
