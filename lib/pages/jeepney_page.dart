@@ -31,9 +31,9 @@ class _JeepneyPageState extends State<JeepneyPage> {
 
   Future<void> loadData() async {
     driverList = await getDrivers();
-    print(user.email);
+
     setDriver(driverList.firstWhere((driver) => driver?.email == user.email)!);
-    print(currentDriver!.email);
+
     jeep = await getJeepById(currentDriver!.jeepDriving);
 
     occupiedJeeps = driverList.map((driver) => driver!.jeepDriving).toList();

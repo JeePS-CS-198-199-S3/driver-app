@@ -1,11 +1,16 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:mapbox_gl/mapbox_gl.dart';
 
 import '../models/driver_emergency_model.dart';
+import '../models/driver_model.dart';
+import '../models/jeep_model.dart';
+import '../models/route_model.dart';
 import '../models/routes.dart';
+import '../services/database_manager.dart';
 import '../services/mapbox.dart';
 import '../style/constants.dart';
 
@@ -17,6 +22,8 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
+  final user = FirebaseAuth.instance.currentUser!;
+
   late MapboxMapController _mapController;
   late Timer _timer;
   late StreamSubscription driverEmergencySubscription;
@@ -25,6 +32,7 @@ class _MapPageState extends State<MapPage> {
   List<DriverEmergencyCircle> inMap = [];
 
   _onMapCreated(MapboxMapController controller) {
+    loadData();
     _mapController = controller;
 
     _mapController.onCircleTapped.add(_onCircleTapped);
@@ -84,11 +92,51 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
+  Driver? driver;
+  Jeep? jeep;
+  Routes? route;
+
+  void addRoute(MapboxMapController controller) {
+    List<LatLng> routeCoordinates = route!.routeCoordinates
+        .map((geoPoint) => LatLng(geoPoint.latitude, geoPoint.longitude))
+        .toList();
+
+    // Add route polyline
+    controller.addLine(LineOptions(
+      geometry: routeCoordinates,
+      lineColor: '#${route!.routeColor.toRadixString(16).toString().substring(2)}',
+      lineWidth: 3.0,
+    ));
+  }
+
+  Future<void> loadData() async {
+    driver = await getDriverByEmail(user.email!);
+
+    if (driver != null) {
+      jeep = await getJeepById(driver!.jeepDriving);
+    }
+
+    if (jeep != null) {
+      route = await getRouteById(jeep!.routeId);
+    }
+
+    setState(() {});
+
+    if (route != null) {
+      addRoute(_mapController);
+    }
+
+  }
 
   @override
   void initState() {
     super.initState();
+    // Initialize variables to null
+    driver = null;
+    jeep = null;
+    route = null;
   }
+
 
   @override
   void dispose() {
