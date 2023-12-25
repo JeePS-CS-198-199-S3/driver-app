@@ -4,7 +4,7 @@ class Driver {
   final String name;
   final String email;
   final bool isVerified;
-  final String jeepDriving;
+  late final String jeepDriving;
 
   Driver({required this.name, required this.email, required this.isVerified, required this.jeepDriving});
 

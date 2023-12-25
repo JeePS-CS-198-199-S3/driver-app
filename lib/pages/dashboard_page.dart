@@ -34,9 +34,7 @@ class _DashboardPageState extends State<DashboardPage> {
       route = await getRouteById(jeep!.routeId);
     }
 
-    setState(() {
-      // State is set after data is loaded
-    });
+    setState(() {});
   }
 
   @override
