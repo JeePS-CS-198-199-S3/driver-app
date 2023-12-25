@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../models/driver_model.dart';
 import '../models/jeep_model.dart';
+import '../models/route_model.dart';
 
 List<String> jeepFrontImg = [
   'lib/images/ikot_front.png',
@@ -80,6 +81,28 @@ Future<Jeep?> getJeepById(String jeepId) async {
   } catch (e) {
     // Handle errors here
     print("Error fetching Jeep by ID: $e");
+    return null;
+  }
+}
+
+Future<Routes?> getRouteById(int routeId) async {
+  try {
+    QuerySnapshot<Map<String, dynamic>> querySnapshot = await FirebaseFirestore.instance
+        .collection('routes') // Replace with your collection name
+        .where('route_id', isEqualTo: routeId)
+        .limit(1)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      // Assuming that there is only one document with the given jeepId
+      return Routes.fromSnapshot(querySnapshot.docs.first);
+    } else {
+      // No document found with the given jeepId
+      return null;
+    }
+  } catch (e) {
+    // Handle errors here
+    print("Error fetching Route by ID: $e");
     return null;
   }
 }

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:mapbox_gl/mapbox_gl.dart';
 
 import '../models/driver_emergency_model.dart';
+import '../models/routes.dart';
 import '../services/mapbox.dart';
 import '../style/constants.dart';
 
@@ -21,45 +22,65 @@ class _MapPageState extends State<MapPage> {
   late StreamSubscription driverEmergencySubscription;
   final CollectionReference driverEmergencyCollection = FirebaseFirestore.instance.collection('driver_emergency');
   List<DriverEmergencyCircle> emergencies = [];
+  List<DriverEmergencyCircle> inMap = [];
 
   _onMapCreated(MapboxMapController controller) {
     _mapController = controller;
+
+    _mapController.onCircleTapped.add(_onCircleTapped);
+  }
+
+  _onMapStyleLoaded() {
+    listenToEmergencies();
+    _timer = Timer.periodic(const Duration(seconds: 5), (Timer t) => updateMap());
+  }
+
+  void _onCircleTapped(Circle circle) {
+    _mapController.updateCircle(circle, tappedDriverEmergency);
   }
 
   void listenToEmergencies() {
-    driverEmergencySubscription = driverEmergencyCollection.snapshots().listen((QuerySnapshot snapshot) {
+    driverEmergencySubscription = driverEmergencyCollection
+        .where('timestamp', isGreaterThan: DateTime.now().subtract(const Duration(seconds: sosLifespan)))
+        .snapshots()
+        .listen((QuerySnapshot snapshot) {
       setState(() {
         emergencies = snapshot.docs.map((doc) {
           DriverEmergency driverEmergency = DriverEmergency.fromSnapshot(doc);
-          CircleOptions driverEmergencyCircle = CircleOptions(
-              geometry: LatLng(driverEmergency.location.latitude, driverEmergency.location.longitude),
-              circleColor: '#F44336',
-              circleRadius: 5.0,
-              circleOpacity: 0.5
+          return DriverEmergencyCircle(driverEmergency: driverEmergency,  driverEmergencyCircle: Circle("EmergencyCircle", CircleOptions(
+            geometry: LatLng(driverEmergency.location.latitude, driverEmergency.location.longitude),
+            circleColor: emergencyColors[driverEmergency.type],
+            circleRadius: 7.0,
+            circleOpacity: 0.5,
+            ))
           );
-          return DriverEmergencyCircle(driverEmergency: driverEmergency, circleOptions: driverEmergencyCircle);
         }).toList();
       });
+      updateMap();
     });
+
   }
 
-  void updateMapWithFilteredEmergencies() {
-    // Filter emergencies based on the timestamp
-    emergencies = emergencies
-        .where((emergency) => DateTime.now().difference(emergency.driverEmergency.timestamp.toDate()).inSeconds < sosLifespan)
-        .toList();
-
-    // Update MapboxMap with the filtered emergencies
-    updateMap();
-  }
+  // void updateMapWithFilteredEmergencies() {
+  //   // Filter emergencies based on the timestamp
+  //   print("listenToEmergencies: ${emergencies.length}");
+  //   emergencies = emergencies
+  //       .where((emergency) => DateTime.now().difference(emergency.driverEmergency.timestamp.toDate()).inSeconds < sosLifespan)
+  //       .toList();
+  //
+  //   print("updateMapWithFilteredEmergencies: ${emergencies.length}");
+  //   // Update MapboxMap with the filtered emergencies
+  //
+  // }
 
   void updateMap() {
-    // Clear existing map markers
     _mapController.clearCircles();
 
     // Add red circles for each emergency
     for (DriverEmergencyCircle emergency in emergencies) {
-      _mapController.addCircle(emergency.circleOptions);
+      if (DateTime.now().difference(emergency.driverEmergency.timestamp.toDate()).inSeconds < sosLifespan) {
+        _mapController.addCircle(emergency.driverEmergencyCircle.options);
+      }
     }
   }
 
@@ -67,14 +88,12 @@ class _MapPageState extends State<MapPage> {
   @override
   void initState() {
     super.initState();
-    listenToEmergencies();
-    _timer = Timer.periodic(const Duration(seconds: 5), (Timer t) =>
-    updateMapWithFilteredEmergencies());
   }
 
   @override
   void dispose() {
     driverEmergencySubscription.cancel();
+    _timer.cancel();
     _mapController.dispose();
     super.dispose();
   }
@@ -82,16 +101,32 @@ class _MapPageState extends State<MapPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: MapboxMap(
-        accessToken: accessToken,
-        initialCameraPosition: const CameraPosition(
-            target: initialCameraPosition,
-            zoom: zoom
-        ),
-        onMapCreated: _onMapCreated,
-        styleString: mapStyle,
-        rotateGesturesEnabled: false,
-        tiltGesturesEnabled: false,
+      body: Column(
+        children: [
+          Expanded(
+            flex: 3,
+            child: MapboxMap(
+              accessToken: accessToken,
+              initialCameraPosition: const CameraPosition(
+                  target: initialCameraPosition,
+                  zoom: zoom
+              ),
+              onMapCreated: _onMapCreated,
+              onStyleLoadedCallback: _onMapStyleLoaded,
+              styleString: mapStyle,
+              rotateGesturesEnabled: false,
+              tiltGesturesEnabled: false,
+            ),
+          ),
+          Expanded(
+            flex: 1,
+            child: Container(
+              decoration: const BoxDecoration(
+                color: Constants.bgColor
+              ),
+            )
+          )
+        ],
       )
     );
   }

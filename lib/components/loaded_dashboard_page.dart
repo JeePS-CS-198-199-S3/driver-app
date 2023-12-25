@@ -1,18 +1,22 @@
 import 'dart:async';
 
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
 
 import '../models/driver_model.dart';
+import '../models/route_model.dart';
 import '../models/jeep_model.dart';
 import '../models/routes.dart';
 import '../style/constants.dart';
+import 'button.dart';
 
 class LoadedDashboardPage extends StatefulWidget {
   final Driver driver;
   final Jeep jeep;
-  const LoadedDashboardPage({super.key, required this.driver, required this.jeep});
+  final Routes route;
+  const LoadedDashboardPage({super.key, required this.driver, required this.jeep, required this.route});
 
   @override
   State<LoadedDashboardPage> createState() => _LoadedDashboardPageState();
@@ -47,14 +51,15 @@ class _LoadedDashboardPageState extends State<LoadedDashboardPage> {
     }
   }
 
-  void sendLocation(){
+  void sendLocation(int type){
     CollectionReference driverEmergencyCollection = FirebaseFirestore.instance.collection('driver_emergency');
     driverEmergencyCollection.add({
       'location': GeoPoint(_locationData!.latitude!, _locationData!.longitude!),
       'timestamp': FieldValue.serverTimestamp(),
       'jeep_id': widget.jeep.id,
       'driver_name': widget.driver.name,
-      'route_id': widget.jeep.routeId
+      'route_id': widget.jeep.routeId,
+      'type': type
     });
   }
 
@@ -153,6 +158,7 @@ class _LoadedDashboardPageState extends State<LoadedDashboardPage> {
 
   @override
   Widget build(BuildContext context) {
+
     return Column(
       children: [
         Text(
@@ -254,13 +260,13 @@ class _LoadedDashboardPageState extends State<LoadedDashboardPage> {
                         children: [
                           Text("Route: ${routes[widget.jeep.routeId]}", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                           const SizedBox(width: 5),
-                          const Icon(Icons.circle, color: Colors.yellow, size:13)
+                          Icon(Icons.circle, color: Color(widget.route.routeColor), size:13)
                         ],
                       ),
-                      const Text("Fare: PHP 10.00", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      Text("Fare: ${widget.route.routeFare}/${widget.route.routeFareDiscounted}", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                     ],
                   ),
-                ),
+                )
               ),
               const SizedBox(width: Constants.defaultPadding),
               Column(
@@ -292,7 +298,41 @@ class _LoadedDashboardPageState extends State<LoadedDashboardPage> {
                   const SizedBox(height: Constants.defaultPadding),
                   Expanded(
                     child: GestureDetector(
-                      onTap: sendLocation,
+                      onTap: () {
+                        int choice = 0;
+                        bool selected = false;
+                        AwesomeDialog(
+                          context: context,
+                          dialogType: DialogType.noHeader,
+                          showCloseIcon: true,
+                          body: Padding(
+                            padding: const EdgeInsets.all(Constants.defaultPadding),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                Button(onTap: (){
+                                  choice = 0;
+                                  selected = true;
+                                }, text: "Accident"),
+                                Button(onTap: (){
+                                  choice = 1;
+                                  selected = true;
+                                }, text: "Crime"),
+                                Button(onTap: (){
+                                  choice = 2;
+                                  selected = true;
+                                }, text: "Mechanical\nProblem")
+                              ],
+                            ),
+                          ),
+                          btnOkText: 'Send Distress Signal',
+                          btnOkOnPress: (){
+                            if (selected) {
+                              sendLocation(choice);
+                            }
+                          }
+                        ).show();
+                      },
                       child: Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(

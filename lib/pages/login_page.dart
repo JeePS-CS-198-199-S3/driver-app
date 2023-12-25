@@ -153,7 +153,11 @@ class _LoginPageState extends State<LoginPage> {
 
                   const SizedBox(height: Constants.defaultPadding*2.5),
 
-                  SquareTile(imagePath: 'lib/images/google.png', onTap: () => AuthService().signInWithGoogle()),
+                  SquareTile(imagePath: 'lib/images/google.png', onTap: () async {
+                    UserCredential? userCredential = await AuthService().signInWithGoogle();
+                    AuthService().createUserDocument(userCredential?.user);
+                    }
+                  ),
 
                   const SizedBox(height: Constants.defaultPadding*2),
 

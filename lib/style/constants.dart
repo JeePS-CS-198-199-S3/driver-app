@@ -19,9 +19,5 @@ class Constants {
 
   static const defaultPadding = 16.0;
 
-  static const  ikotColor = Color(0xFFFFC107);
-  static const  tokiColor = Color(0xFFF57F17);
-  static const  katipColor = Color(0xFFC62828);
-  static const  philcoaColor = Color(0xFF388E3C);
-  static const  smColor = Color(0xFF1565C0);
+  static const routeColor = [Color(0xFFFFC107), Color(0xFFF57F17), Color(0xFFC62828), Color(0xFF388E3C), Color(0xFF1565C0)];
 }
