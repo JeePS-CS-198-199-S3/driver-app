@@ -23,29 +23,21 @@ class _LoginPageState extends State<LoginPage> {
 
   // sign user in method
   void signUserIn() async {
-
     // show loading circle
     showDialog(
-      context: context,
-      builder: (context) {
-        return const Center(
-          child: CircularProgressIndicator()
-        );
-      }
-    );
+        context: context,
+        builder: (context) {
+          return const Center(child: CircularProgressIndicator());
+        });
 
     // try sign in
-    try{
+    try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: emailController.text,
-          password: passwordController.text
-      );
+          email: emailController.text, password: passwordController.text);
 
       // pop loading circle
       Navigator.pop(context);
-
     } on FirebaseAuthException catch (e) {
-
       // pop loading circle
       Navigator.pop(context);
       errorMessage(e.code);
@@ -54,21 +46,16 @@ class _LoginPageState extends State<LoginPage> {
 
   void errorMessage(String message) {
     showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: Constants.bgColor,
-          title: Center(
-            child: Text(
-              message,
-              style: const TextStyle(
-                color: Colors.white
-              ),
-            )
-          )
-        );
-      }
-    );
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+              backgroundColor: Constants.bgColor,
+              title: Center(
+                  child: Text(
+                message,
+                style: const TextStyle(color: Colors.white),
+              )));
+        });
   }
 
   @override
@@ -78,37 +65,37 @@ class _LoginPageState extends State<LoginPage> {
       body: SafeArea(
         child: Center(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: Constants.defaultPadding),
+            padding: const EdgeInsets.symmetric(
+                horizontal: Constants.defaultPadding),
             child: SingleChildScrollView(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-              
-                  const Icon(
-                    Icons.emoji_transportation,
-                    size: 100,
-                    color: Colors.white,
+                  const Image(
+                    image: AssetImage('lib/images/logo.png'),
+                    height: 150,
                   ),
-              
-                  const SizedBox(height: Constants.defaultPadding*3),
-              
+                  const SizedBox(height: Constants.defaultPadding * 1),
                   const Text(
-                    "Welcome to Transitrack Driver's App!",
-                    style: TextStyle(
-                      color: Colors.white
-                    ),
+                    "Welcome to JeePS Driver's App!",
+                    style: TextStyle(color: Colors.white),
                   ),
-              
-                  const SizedBox(height: Constants.defaultPadding*3),
-              
-                  InputTextField(controller: emailController, hintText: "Email", obscureText: false),
-              
+                  const SizedBox(height: Constants.defaultPadding * 2),
+                  const Divider(
+                    height: 1,
+                    color: Color.fromARGB(102, 158, 158, 158),
+                  ),
+                  const SizedBox(height: Constants.defaultPadding * 2),
+                  InputTextField(
+                      controller: emailController,
+                      hintText: "Email",
+                      obscureText: false),
                   const SizedBox(height: Constants.defaultPadding),
-              
-                  InputTextField(controller: passwordController, hintText: "Password", obscureText: true),
-              
-                  const SizedBox(height: Constants.defaultPadding/2),
-              
+                  InputTextField(
+                      controller: passwordController,
+                      hintText: "Password",
+                      obscureText: true),
+                  const SizedBox(height: Constants.defaultPadding / 2),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
@@ -118,74 +105,39 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ],
                   ),
-              
-                  const SizedBox(height: Constants.defaultPadding*2),
-              
-                  Button(onTap: signUserIn, text: "Sign In",),
-
-                  const SizedBox(height: Constants.defaultPadding*2.5),
-
-                  const Row(
-                    children: [
-                      Expanded(
-                        child: Divider(
-                          thickness: 0.5,
-                          color: Colors.white,
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 10.0),
-                        child: Text(
-                          "Or continue with",
-                          style: TextStyle(
-                              color: Colors.white
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Divider(
-                          thickness: 0.5,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
+                  const SizedBox(height: Constants.defaultPadding * 2),
+                  Button(
+                    onTap: signUserIn,
+                    text: "Sign In",
                   ),
-
-                  const SizedBox(height: Constants.defaultPadding*2.5),
-
-                  SquareTile(imagePath: 'lib/images/google.png', onTap: () async {
-                    UserCredential? userCredential = await AuthService().signInWithGoogle();
-                    AuthService().createUserDocument(userCredential?.user);
-                    }
-                  ),
-
-                  const SizedBox(height: Constants.defaultPadding*2),
-
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(
-                        'Not a member?',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      const SizedBox(width: 4),
-                      GestureDetector(
-                        onTap: widget.onTap,
-                        child: const Text(
-                          'Register now',
-                          style: TextStyle(color: Constants.primaryColor, fontWeight: FontWeight.bold),
-                        ),
-                      )
-                    ],
-                  )
+                  const SizedBox(height: Constants.defaultPadding * 2.5),
                 ],
               ),
             ),
           ),
         ),
       ),
+      bottomNavigationBar: Container(
+        margin: const EdgeInsets.only(bottom: 20),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              'Not a member?',
+              style: TextStyle(color: Colors.white),
+            ),
+            const SizedBox(width: 4),
+            GestureDetector(
+              onTap: widget.onTap,
+              child: const Text(
+                'Register now',
+                style: TextStyle(
+                    color: Constants.primaryColor, fontWeight: FontWeight.bold),
+              ),
+            )
+          ],
+        ),
+      ),
     );
   }
 }
-
-

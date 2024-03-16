@@ -45,41 +45,46 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Constants.bgColor,
-      appBar: AppBar(
         backgroundColor: Constants.bgColor,
-        iconTheme: IconThemeData(color: Colors.white),
-      ),
-      bottomNavigationBar: BottomNavBar(
-        onTabChange: (index) => navigateBottomBar(index),
-      ),
-      drawer: Drawer(
-        backgroundColor: Constants.bgColor,
-        child: SingleChildScrollView(
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(Constants.defaultPadding),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  SizedBox(height: Constants.defaultPadding*3),
-
-                  Icon(Icons.directions_bus, size: 150, color: Colors.white),
-
-                  SizedBox(height: Constants.defaultPadding*3),
-
-                  ListTile(
-                    leading: const Icon(Icons.logout, color: Colors.white,),
-                    title: Text("Logout", style: TextStyle(color: Colors.white),),
-                    onTap: signUserOut,
-                  )
-                ],
+        appBar: AppBar(
+          backgroundColor: Constants.bgColor,
+          iconTheme: IconThemeData(color: Colors.white),
+        ),
+        bottomNavigationBar: BottomNavBar(
+          onTabChange: (index) => navigateBottomBar(index),
+        ),
+        drawer: Drawer(
+          backgroundColor: Constants.bgColor,
+          child: SingleChildScrollView(
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(Constants.defaultPadding),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const SizedBox(height: Constants.defaultPadding * 3),
+                    const Image(
+                      image: AssetImage('lib/images/icon.png'),
+                      height: 150,
+                    ),
+                    const SizedBox(height: Constants.defaultPadding * 3),
+                    ListTile(
+                      leading: const Icon(
+                        Icons.logout,
+                        color: Colors.white,
+                      ),
+                      title: Text(
+                        "Logout",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      onTap: signUserOut,
+                    )
+                  ],
+                ),
               ),
             ),
           ),
         ),
-      ),
-      body: pages[selectedIndex]
-    );
+        body: pages[selectedIndex]);
   }
 }

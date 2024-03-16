@@ -13,25 +13,30 @@ List<String> jeepFrontImg = [
 ];
 
 Future<List<Jeep>> getJeepsFromFirestore(int route) async {
-  if (route != -1){
-    QuerySnapshot<Map<String, dynamic>> snapshot =
-    await FirebaseFirestore.instance.collection('jeeps_realtime').where('route_id', isEqualTo: route).get();
+  if (route != -1) {
+    QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore
+        .instance
+        .collection('jeeps_realtime')
+        .where('route_id', isEqualTo: route)
+        .get();
     return snapshot.docs.map((doc) => Jeep.fromSnapshot(doc)).toList();
   } else {
     QuerySnapshot<Map<String, dynamic>> snapshot =
-    await FirebaseFirestore.instance.collection('jeeps_realtime').get();
+        await FirebaseFirestore.instance.collection('jeeps_realtime').get();
     return snapshot.docs.map((doc) => Jeep.fromSnapshot(doc)).toList();
   }
 }
 
 Future<List<Driver>> getDrivers() async {
   try {
-    QuerySnapshot<Map<String, dynamic>> querySnapshot = await FirebaseFirestore.instance
-        .collection('drivers') // Replace with your collection name
-        .get();
+    QuerySnapshot<Map<String, dynamic>> querySnapshot =
+        await FirebaseFirestore.instance
+            .collection('accounts') // Replace with your collection name
+            .get();
 
     // Convert the QuerySnapshot into a List<Driver>
-    List<Driver> drivers = querySnapshot.docs.map((doc) => Driver.fromSnapshot(doc)).toList();
+    List<Driver> drivers =
+        querySnapshot.docs.map((doc) => Driver.fromSnapshot(doc)).toList();
 
     return drivers;
   } catch (e) {
@@ -43,11 +48,12 @@ Future<List<Driver>> getDrivers() async {
 
 Future<Driver?> getDriverByEmail(String email) async {
   try {
-    QuerySnapshot<Map<String, dynamic>> querySnapshot = await FirebaseFirestore.instance
-        .collection('drivers') // Replace with your collection name
-        .where('email', isEqualTo: email)
-        .limit(1)
-        .get();
+    QuerySnapshot<Map<String, dynamic>> querySnapshot =
+        await FirebaseFirestore.instance
+            .collection('accounts') // Replace with your collection name
+            .where('account_email', isEqualTo: email)
+            .limit(1)
+            .get();
 
     if (querySnapshot.docs.isNotEmpty) {
       // Assuming that there is only one document with the given email
@@ -65,11 +71,12 @@ Future<Driver?> getDriverByEmail(String email) async {
 
 Future<Jeep?> getJeepById(String jeepId) async {
   try {
-    QuerySnapshot<Map<String, dynamic>> querySnapshot = await FirebaseFirestore.instance
-        .collection('jeeps_realtime') // Replace with your collection name
-        .where('device_id', isEqualTo: jeepId)
-        .limit(1)
-        .get();
+    QuerySnapshot<Map<String, dynamic>> querySnapshot =
+        await FirebaseFirestore.instance
+            .collection('jeeps_realtime') // Replace with your collection name
+            .where('device_id', isEqualTo: jeepId)
+            .limit(1)
+            .get();
 
     if (querySnapshot.docs.isNotEmpty) {
       // Assuming that there is only one document with the given jeepId
@@ -87,11 +94,12 @@ Future<Jeep?> getJeepById(String jeepId) async {
 
 Future<Routes?> getRouteById(int routeId) async {
   try {
-    QuerySnapshot<Map<String, dynamic>> querySnapshot = await FirebaseFirestore.instance
-        .collection('routes') // Replace with your collection name
-        .where('route_id', isEqualTo: routeId)
-        .limit(1)
-        .get();
+    QuerySnapshot<Map<String, dynamic>> querySnapshot =
+        await FirebaseFirestore.instance
+            .collection('routes') // Replace with your collection name
+            .where('route_id', isEqualTo: routeId)
+            .limit(1)
+            .get();
 
     if (querySnapshot.docs.isNotEmpty) {
       // Assuming that there is only one document with the given jeepId
@@ -109,8 +117,9 @@ Future<Routes?> getRouteById(int routeId) async {
 
 Future<void> updateJeepDriving(String email, String newJeepDriving) async {
   try {
-    QuerySnapshot<Map<String, dynamic>> querySnapshot = await FirebaseFirestore.instance
-        .collection('drivers')
+    QuerySnapshot<Map<String, dynamic>> querySnapshot = await FirebaseFirestore
+        .instance
+        .collection('accounts')
         .where('email', isEqualTo: email)
         .limit(1)
         .get();
@@ -119,7 +128,7 @@ Future<void> updateJeepDriving(String email, String newJeepDriving) async {
       String documentId = querySnapshot.docs.first.id;
 
       await FirebaseFirestore.instance
-          .collection('drivers')
+          .collection('accounts')
           .doc(documentId)
           .update({'jeepDriving': newJeepDriving});
 

@@ -6,15 +6,19 @@ class Driver {
   final bool isVerified;
   late final String jeepDriving;
 
-  Driver({required this.name, required this.email, required this.isVerified, required this.jeepDriving});
+  Driver(
+      {required this.name,
+      required this.email,
+      required this.isVerified,
+      required this.jeepDriving});
 
   factory Driver.fromSnapshot(QueryDocumentSnapshot<Object?> snapshot) {
     Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
 
-    String name = data['name'];
-    String email = data['email'];
-    bool isVerified = data['isVerified'];
-    String jeepDriving = data['jeepDriving'];
+    String name = data['account_name'];
+    String email = data['account_email'];
+    bool isVerified = data['is_verified'];
+    String jeepDriving = data['jeep_driving'];
 
     return Driver(
       name: name,

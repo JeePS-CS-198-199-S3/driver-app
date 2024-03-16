@@ -13,29 +13,29 @@ class BottomNavBar extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(left: 25, right: 25, bottom: 15),
       child: GNav(
-        onTabChange: (value) => onTabChange!(value),
-        color: Colors.white,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        activeColor: Colors.white,
-        tabBackgroundColor: Constants.secondaryColor,
-        tabBorderRadius: 24,
-        tabActiveBorder: Border.all(
+          onTabChange: (value) => onTabChange!(value),
           color: Colors.white,
-        ),
-        tabs: const [
-        GButton(
-          icon: Icons.dashboard,
-          text: 'Dashboard',
-        ),
-        GButton(
-          icon: Icons.directions_bus,
-          text: 'Jeeps',
-        ),
-        GButton(
-          icon: Icons.map,
-          text: 'Map',
-        ),
-      ]),
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          activeColor: Colors.white,
+          tabBackgroundColor: Constants.secondaryColor,
+          tabBorderRadius: 24,
+          tabActiveBorder: Border.all(
+            color: Colors.white,
+          ),
+          tabs: const [
+            GButton(
+              icon: Icons.dashboard,
+              text: 'Dashboard',
+            ),
+            GButton(
+              icon: Icons.directions_bus,
+              text: 'Jeeps',
+            ),
+            GButton(
+              icon: Icons.map,
+              text: 'Map',
+            ),
+          ]),
     );
   }
 }
