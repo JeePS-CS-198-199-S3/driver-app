@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_displaymode/flutter_displaymode.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:transitrack_driver/pages/auth_page.dart';
 import 'package:transitrack_driver/style/constants.dart';
 import 'firebase_options.dart';
@@ -9,6 +11,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  FlutterDisplayMode.setHighRefreshRate();
   runApp(const MyApp());
 }
 
@@ -20,12 +23,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primaryColor: Constants.bgColor,
-        disabledColor: Colors.grey,
-      ),
+      theme: ThemeData.dark().copyWith(
+          scaffoldBackgroundColor: Constants.secondaryColor,
+          textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme)
+              .apply(bodyColor: Colors.white),
+          canvasColor: Constants.secondaryColor),
       themeMode: ThemeMode.dark,
-      home: AuthPage(),
+      home: const AuthPage(),
     );
   }
 }

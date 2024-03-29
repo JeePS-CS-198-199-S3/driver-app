@@ -1,11 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:transitrack_driver/components/button.dart';
-import 'package:transitrack_driver/components/square_tile.dart';
 
 import '../components/text_field.dart';
-import '../services/auth_service.dart';
 import '../style/constants.dart';
 
 class LoginPage extends StatefulWidget {
@@ -108,7 +105,7 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(height: Constants.defaultPadding * 2),
                   Button(
                     onTap: signUserIn,
-                    text: "Sign In",
+                    widget: const Text("Sign In"),
                   ),
                   const SizedBox(height: Constants.defaultPadding * 2.5),
                 ],

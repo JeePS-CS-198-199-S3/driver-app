@@ -1,13 +1,14 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 import '../style/constants.dart';
 
 class Button extends StatelessWidget {
 
   final Function()? onTap;
-  final String text;
+  final Widget widget;
+  final Color color;
 
-  const Button({super.key, required this.onTap, required this.text});
+  const Button({super.key, required this.onTap, required this.widget, this.color = Colors.blue});
 
   @override
   Widget build(BuildContext context) {
@@ -15,20 +16,13 @@ class Button extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: Constants.primaryColor,
-          borderRadius: BorderRadius.circular(8)
+            color: color,
+            borderRadius: BorderRadius.circular(8)
         ),
         child: Center(
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: Constants.defaultPadding),
-            child: Text(
-              text,
-              style: const TextStyle(
-                color: Constants.bgColor,
-                fontWeight: FontWeight.bold,
-                fontSize: 16
-              ),
-            ),
+            child: widget
           ),
         ),
       ),

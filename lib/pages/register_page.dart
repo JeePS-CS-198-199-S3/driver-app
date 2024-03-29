@@ -1,11 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:transitrack_driver/components/button.dart';
 
-import '../components/square_tile.dart';
 import '../components/text_field.dart';
-import '../services/auth_service.dart';
 import '../style/constants.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -114,7 +111,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(height: Constants.defaultPadding * 2),
                   Button(
                     onTap: signUserUp,
-                    text: "Sign Up",
+                    widget: const Text("Sign Up"),
                   ),
                   const SizedBox(height: Constants.defaultPadding * 2.5),
                 ],

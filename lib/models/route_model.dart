@@ -1,17 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Routes {
-  final String routeName;
-  final int routeId;
+  final String route_name;
+  final int route_id;
   final bool enabled;
-  final int routeColor;
-  final List<GeoPoint> routeCoordinates;
-  final double routeFare;
-  final double routeFareDiscounted;
-  final List<int> routeTime;
+  final int route_color;
+  final List<GeoPoint> route_coordinates;
+  final double route_fare;
+  final double route_fare_discounted;
+  final List<int> route_time;
 
 
-  Routes({required this.routeName, required this.routeId, required this.enabled, required this.routeColor, required this.routeCoordinates, required this.routeFare, required this.routeFareDiscounted, required this.routeTime});
+  Routes({required this.route_name, required this.route_id, required this.enabled, required this.route_color, required this.route_coordinates, required this.route_fare, required this.route_fare_discounted, required this.route_time});
 
   factory Routes.fromSnapshot(QueryDocumentSnapshot<Object?> snapshot) {
     Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
@@ -27,14 +27,14 @@ class Routes {
 
 
     return Routes(
-      routeName: routeName,
-      routeId: routeId,
+      route_name: routeName,
+      route_id: routeId,
       enabled: enabled,
-      routeColor: routeColor,
-      routeCoordinates: routeCoordinates,
-      routeFare: routeFare,
-      routeFareDiscounted: routeFareDiscounted,
-      routeTime: routeTime
+      route_color: routeColor,
+      route_coordinates: routeCoordinates,
+      route_fare: routeFare,
+      route_fare_discounted: routeFareDiscounted,
+      route_time: routeTime
     );
   }
 }

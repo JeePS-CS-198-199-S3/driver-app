@@ -1,47 +1,51 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class Jeep {
-  final String id;            // plate number
-  final int routeId;       // 0 for ikot
-  final int passengerCount;
-  final int maxCapacity;
-  final GeoPoint location;
-  final Timestamp timestamp;
-  final double bearing;
-  final bool isOperating;
+class JeepData {
+  String device_id;
+  Timestamp timestamp;
+  int passenger_count;
+  int max_capacity;
+  GeoPoint location;
+  int route_id;
+  double bearing;
 
-  Jeep({
-    required this.id,
-    required this.routeId,
-    required this.passengerCount,
-    required this.maxCapacity,
-    required this.location,
+  JeepData({
+    required this.device_id,
     required this.timestamp,
+    required this.passenger_count,
+    required this.max_capacity,
+    required this.location,
+    required this.route_id,
     required this.bearing,
-    required this.isOperating
   });
 
-  factory Jeep.fromSnapshot(QueryDocumentSnapshot<Object?> snapshot) {
+  factory JeepData.fromSnapshot(QueryDocumentSnapshot snapshot) {
     Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
 
-    String id = data['device_id'];
-    int routeId = data['route_id'];
-    int passengerCount = data['passenger_count'];
-    int maxCapacity = 16;
-    GeoPoint location = data['location'];
-    Timestamp timestamp  = data['timestamp'];
-    double bearing = data['bearing'] as double;
-    bool isOperating = data['is_active'];
-
-    return Jeep(
-      id: id,
-      routeId: routeId,
-      passengerCount: passengerCount,
-      maxCapacity: maxCapacity,
-      location: location,
-      timestamp: timestamp,
-      bearing: bearing,
-      isOperating: isOperating
+    return JeepData(
+      device_id: data['device_id'],
+      timestamp: data['timestamp'],
+      passenger_count: data['passenger_count'],
+      max_capacity: data['max_capacity'],
+      location: data['location'],
+      route_id: data['route_id'],
+      bearing: data['bearing'],
     );
+  }
+}
+
+Future<JeepData?> fetchJeepData(String deviceId) async {
+  try {
+    CollectionReference jeepsCollection = FirebaseFirestore.instance.collection('jeeps_realtime');
+    QuerySnapshot querySnapshot = await jeepsCollection.where('device_id', isEqualTo: deviceId).get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      return JeepData.fromSnapshot(querySnapshot.docs.first);
+    } else {
+      return null;
+    }
+  } catch (e) {
+    print('Error fetching jeep data: $e');
+    return null;
   }
 }

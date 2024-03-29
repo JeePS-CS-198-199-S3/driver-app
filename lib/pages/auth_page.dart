@@ -16,12 +16,12 @@ class AuthPage extends StatelessWidget {
         builder: (context, snapshot) {
           // Logged in
           if(snapshot.hasData) {
-            return HomePage();
+            return HomePage(currentUserAuth: snapshot.data!);
           }
 
           // NOT logged in
           else {
-            return LoginOrRegisterPage();
+            return const LoginOrRegisterPage();
           }
         },
       )
