@@ -1,4 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:transitrack_driver/models/jeep_driver_model.dart';
+import 'package:transitrack_driver/models/route_model.dart';
+
+import 'account_model.dart';
 
 class JeepData {
   String device_id;
@@ -31,6 +36,47 @@ class JeepData {
       route_id: data['route_id'],
       bearing: data['bearing'],
     );
+  }
+}
+
+Future<List<JeepDriverData>> fetchJeeps() async {
+  try {
+    CollectionReference routesCollection = FirebaseFirestore.instance.collection('routes');
+    QuerySnapshot routesQuerySnapshot = await routesCollection.orderBy('route_id').get();
+
+    CollectionReference jeepsCollection = FirebaseFirestore.instance.collection('jeeps_realtime');
+    QuerySnapshot jeepsQuerySnapshot = await jeepsCollection.get();
+
+    CollectionReference driverCollection = FirebaseFirestore.instance.collection('accounts');
+    QuerySnapshot driverQuerySnapshot = await driverCollection.where('account_type', isEqualTo: 1).where('jeep_driving', isNotEqualTo: "").get();
+
+    List<RouteData> routesData = routesQuerySnapshot.docs.map((e) => RouteData.fromFirestore(e)).toList();
+    print(routesData.length);
+    List<JeepData> jeepsData = jeepsQuerySnapshot.docs.map((e) => JeepData.fromSnapshot(e)).toList();
+
+    List<AccountData> accountsData = driverQuerySnapshot.docs.map((e) => AccountData.fromSnapshot(e)).toList();
+
+    List<JeepDriverData> jeepDriverData = [];
+
+    for (JeepData jeep in jeepsData) {
+      AccountData? account;
+      if (accountsData.any((account) => account.jeep_driving == jeep.device_id)) {
+        account = accountsData.firstWhere((account) => account.jeep_driving == jeep.device_id);
+      }
+
+      jeepDriverData.add(
+        JeepDriverData(
+          jeepData: jeep,
+          driverData: account,
+          routeData: routesData[jeep.route_id]
+        )
+      );
+    }
+
+    return jeepDriverData;
+  } catch (e) {
+    print('Error fetching jeep data: $e');
+    return [];
   }
 }
 

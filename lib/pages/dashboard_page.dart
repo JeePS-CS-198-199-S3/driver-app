@@ -1,9 +1,17 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:transitrack_driver/components/button.dart';
 import 'package:transitrack_driver/components/map_widget.dart';
+import '../components/icon_button_big.dart';
+import '../components/image_button_big.dart';
+import '../components/jeeps_list_widget.dart';
 import '../models/account_model.dart';
+import '../models/jeep_driver_model.dart';
 import '../models/jeep_model.dart';
+import '../models/route_model.dart';
+import '../style/constants.dart';
 
 class DashboardPage extends StatefulWidget {
   final AccountData driverAccount;
@@ -16,6 +24,7 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   late AccountData _driverAccount;
   JeepData? driverJeep;
+  RouteData? driverRoute;
 
   @override
   void initState() {
@@ -66,33 +75,140 @@ class _DashboardPageState extends State<DashboardPage> {
     if (_driverAccount.jeep_driving != "") {
       JeepData? jeepData = await fetchJeepData(_driverAccount.jeep_driving!);
 
-      setState(() {
-        driverJeep = jeepData;
-      });
+      if (jeepData != null) {
+        setState(() {
+          driverJeep = jeepData;
+        });
+      } else {
+        setState(() {
+          driverJeep = null;
+        });
+      }
     } else {
       setState(() {
         driverJeep = null;
       });
     }
 
+    fetchRoute();
   }
 
+  void fetchRoute() async {
+    RouteData? routeData = await RouteData.fetchRouteData(driverJeep!.route_id);
 
+    if (routeData != null) {
+      setState(() {
+        driverRoute = routeData;
+      });
+    } else {
+      setState(() {
+        driverRoute = null;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return const SafeArea(
+    return SafeArea(
       child: Column(
         children: [
           Expanded(
             child: MapWidget(),
           ),
-          SizedBox(height: 250)
+          SizedBox(
+            height: 250,
+            child: Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(Constants.defaultPadding),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(_driverAccount.jeep_driving == ""? "Select a PUV to Operate":_driverAccount.jeep_driving!),
+
+                      const SizedBox(height: Constants.defaultPadding/3),
+
+                      const Divider(color: Colors.white),
+
+                      const SizedBox(height: Constants.defaultPadding/3),
+
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: IconButtonBig(color: Colors.red, icon: const Icon(Icons.remove), function: () => print("enabled"), enabled: _driverAccount.jeep_driving != "")
+                          ),
+                          const SizedBox(width: Constants.defaultPadding*7),
+                          Expanded(
+                              child: IconButtonBig(color: Colors.green, icon: const Icon(Icons.add), function: () => print("enabled"), enabled: _driverAccount.jeep_driving != "")
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: Constants.defaultPadding/3),
+
+                      const Divider(color: Colors.white),
+
+                      const SizedBox(height: Constants.defaultPadding/3),
+
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          IconButtonBig(
+                            color: driverRoute != null
+                              ? Color(driverRoute!.routeColor)
+                              : Colors.grey.withOpacity(0.2),
+                            icon: const Icon(Icons.power_settings_new),
+                            function: () => print("enabled"),
+                            enabled: widget.driverAccount.jeep_driving != "",
+                          ),
+                          Row(
+                            children: [
+                              ImageButtonBig(imagePath: 'lib/images/accidentNoBG.png', color: const Color(0xffC62828), function: () {}, enabled: widget.driverAccount.jeep_driving != ""),
+
+                              const SizedBox(width: Constants.defaultPadding/2),
+
+                              ImageButtonBig(imagePath: 'lib/images/crimeNoBG.png', color: const Color(0xffC62828), function: () {}, enabled: widget.driverAccount.jeep_driving != ""),
+
+                              const SizedBox(width: Constants.defaultPadding/2),
+
+                              ImageButtonBig(imagePath: 'lib/images/mechErrorNoBG.png', color: const Color(0xffC62828), function: () {}, enabled: widget.driverAccount.jeep_driving != "")
+                            ],
+                          )
+                        ],
+                      )
+                    ]
+                  )
+                ),
+                Positioned(
+                  top: Constants.defaultPadding/4,
+                  right: Constants.defaultPadding/4,
+                  child: IconButton(
+                    onPressed: () {
+                      AwesomeDialog(
+                        context: context,
+                        dialogType: DialogType.noHeader,
+                        body: JeepsListWidget(accountData: _driverAccount)
+                      ).show();
+                    },
+                    icon: const Icon(Icons.directions_bus),
+                    iconSize: 17,
+                    visualDensity: VisualDensity.compact,
+                    padding: EdgeInsets.zero
+                  )
+                )
+              ],
+            )
+          ),
         ],
       )
     );
   }
 }
+
+
+
+
 
 
 
