@@ -6,11 +6,9 @@ import 'account_model.dart';
 class JeepDriverData {
   JeepData jeepData;
   AccountData? driverData;
-  RouteData routeData;
 
   JeepDriverData({
     required this.jeepData,
     required this.driverData,
-    required this.routeData
   });
 }

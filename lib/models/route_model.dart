@@ -69,4 +69,20 @@ class RouteData {
       return null;
     }
   }
+
+  static Future<List<RouteData>?> fetchRoutes() async {
+    try {
+      CollectionReference routesCollection = FirebaseFirestore.instance.collection('routes');
+      QuerySnapshot routesQuerySnapshot = await routesCollection.orderBy('route_id').get();
+
+      if (routesQuerySnapshot.docs.isNotEmpty) {
+        return routesQuerySnapshot.docs.map((e) => RouteData.fromFirestore(e)).toList();
+      } else {
+        return [];
+      }
+    } catch (e) {
+      print('Error fetching jeep data: $e');
+      return null;
+    }
+  }
 }

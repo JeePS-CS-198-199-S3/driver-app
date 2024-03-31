@@ -39,19 +39,15 @@ class JeepData {
   }
 }
 
-Future<List<JeepDriverData>> fetchJeeps() async {
+Future<List<JeepDriverData>?> fetchJeeps() async {
   try {
-    CollectionReference routesCollection = FirebaseFirestore.instance.collection('routes');
-    QuerySnapshot routesQuerySnapshot = await routesCollection.orderBy('route_id').get();
-
     CollectionReference jeepsCollection = FirebaseFirestore.instance.collection('jeeps_realtime');
     QuerySnapshot jeepsQuerySnapshot = await jeepsCollection.get();
 
     CollectionReference driverCollection = FirebaseFirestore.instance.collection('accounts');
     QuerySnapshot driverQuerySnapshot = await driverCollection.where('account_type', isEqualTo: 1).where('jeep_driving', isNotEqualTo: "").get();
 
-    List<RouteData> routesData = routesQuerySnapshot.docs.map((e) => RouteData.fromFirestore(e)).toList();
-    print(routesData.length);
+
     List<JeepData> jeepsData = jeepsQuerySnapshot.docs.map((e) => JeepData.fromSnapshot(e)).toList();
 
     List<AccountData> accountsData = driverQuerySnapshot.docs.map((e) => AccountData.fromSnapshot(e)).toList();
@@ -68,7 +64,6 @@ Future<List<JeepDriverData>> fetchJeeps() async {
         JeepDriverData(
           jeepData: jeep,
           driverData: account,
-          routeData: routesData[jeep.route_id]
         )
       );
     }
@@ -76,7 +71,7 @@ Future<List<JeepDriverData>> fetchJeeps() async {
     return jeepDriverData;
   } catch (e) {
     print('Error fetching jeep data: $e');
-    return [];
+    return null;
   }
 }
 

@@ -8,7 +8,6 @@ import '../components/icon_button_big.dart';
 import '../components/image_button_big.dart';
 import '../components/jeeps_list_widget.dart';
 import '../models/account_model.dart';
-import '../models/jeep_driver_model.dart';
 import '../models/jeep_model.dart';
 import '../models/route_model.dart';
 import '../style/constants.dart';
@@ -187,6 +186,7 @@ class _DashboardPageState extends State<DashboardPage> {
                     onPressed: () {
                       AwesomeDialog(
                         context: context,
+                        keyboardAware: false,
                         dialogType: DialogType.noHeader,
                         body: JeepsListWidget(accountData: _driverAccount)
                       ).show();
