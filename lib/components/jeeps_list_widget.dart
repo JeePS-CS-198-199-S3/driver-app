@@ -188,7 +188,7 @@ class _JeepsListWidgetState extends State<JeepsListWidget> {
                     trailing: Text(routes![jeepDriver.jeepData.route_id].routeName),
                     onLongPress: () {
                       Loader(context);
-                      updateDriverJeep(widget.accountData.account_email, jeepDriver.jeepData.device_id);
+                      updateDriverJeep(widget.accountData.account_email, {"jeep_driving": jeepDriver.jeepData.device_id});
                       Future.delayed(const Duration(seconds: 1), () {
                         Navigator.of(context).pop();
                         Navigator.of(context).pop();

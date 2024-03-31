@@ -1,4 +1,5 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -176,7 +177,16 @@ class _DashboardPageState extends State<DashboardPage> {
             child: MapWidget(
               jeepColor: driverRoute?.routeColor,
               jeepLocation: (LocationData jeepLocation) {
-
+                try {
+                  JeepData.updateJeepFirestore(driverJeep!.device_id, {
+                    'location': GeoPoint(jeepLocation.latitude!, jeepLocation.longitude!),
+                    'bearing': jeepLocation.heading,
+                    'passenger_count': passengers,
+                    'timestamp': FieldValue.serverTimestamp()
+                  });
+                } catch (e) {
+                  print("Error Updating Jeep: $e");
+                }
               }
             ),
           ),
@@ -403,7 +413,7 @@ class _DashboardPageState extends State<DashboardPage> {
                               setState(() {
                                 operateModeChoice = 2;
                               });
-                              updateDriverJeep(widget.driverAccount.account_email, "");
+                              updateDriverJeep(widget.driverAccount.account_email, {'jeep_driving': ""});
                             },
                             enabled: widget.driverAccount.jeep_driving != ""
                           ),

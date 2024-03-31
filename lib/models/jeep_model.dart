@@ -37,6 +37,26 @@ class JeepData {
       bearing: data['bearing'],
     );
   }
+
+  static Future<void> updateJeepFirestore(
+      String device_id, Map<String, dynamic> dataToUpdate) async {
+    try {
+      CollectionReference jeepsCollection =
+      FirebaseFirestore.instance.collection('jeeps_realtime');
+      QuerySnapshot querySnapshot = await jeepsCollection
+          .where('device_id', isEqualTo: device_id)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        String docId = querySnapshot.docs.first.id;
+        await jeepsCollection.doc(docId).update(dataToUpdate);
+      } else {
+        print('No document found with the given email: $device_id');
+      }
+    } catch (e) {
+      print('Error updating account data: $e');
+    }
+  }
 }
 
 Future<List<JeepDriverData>?> fetchJeeps() async {
@@ -91,6 +111,6 @@ Future<JeepData?> fetchJeepData(String deviceId) async {
   }
 }
 
-void updateDriverJeep(String email, String plateNumber) async {
-  await AccountData.updateAccountFirestore(email, {'jeep_driving': plateNumber});
+void updateDriverJeep(String email, Map<String, dynamic> update) async {
+  await AccountData.updateAccountFirestore(email, update);
 }
