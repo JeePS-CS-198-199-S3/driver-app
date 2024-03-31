@@ -2,7 +2,9 @@ import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:location/location.dart';
 import 'package:transitrack_driver/components/map_widget.dart';
+import 'package:transitrack_driver/models/jeep_driver_model.dart';
 import '../components/header.dart';
 import '../components/icon_button_big.dart';
 import '../components/image_button_big.dart';
@@ -24,8 +26,12 @@ class _DashboardPageState extends State<DashboardPage> {
   JeepData? driverJeep;
   RouteData? driverRoute;
 
-  int operateModeChoice = 0;
-  List<OperationModes> operateModes = [OperationModes(name: "Passive", color: Colors.red), OperationModes(name: "Semi-Active", color: Colors.orange), OperationModes(name: "Active", color: Colors.green)];
+  int operateModeChoice = 2;
+  List<OperationModes> operateModes = [
+    OperationModes(name: "Passive", color: Colors.red),
+    OperationModes(name: "Semi-Active", color: Colors.orange),
+    OperationModes(name: "Active", color: Colors.green)
+  ];
 
   int passengers = 0;
 
@@ -87,6 +93,20 @@ class _DashboardPageState extends State<DashboardPage> {
           driverJeep = jeepData;
           passengers = driverJeep!.passenger_count;
         });
+
+        if (passengers == -2) {
+          setState(() {
+            operateModeChoice = 0;
+          });
+        } else if (passengers == -1) {
+          setState(() {
+            operateModeChoice = 1;
+          });
+        } else {
+          setState(() {
+            operateModeChoice = 2;
+          });
+        }
 
         fetchRoute();
       } else {
@@ -153,7 +173,12 @@ class _DashboardPageState extends State<DashboardPage> {
           Header(driverAccount: _driverAccount),
 
           Expanded(
-            child: MapWidget(),
+            child: MapWidget(
+              jeepColor: driverRoute?.routeColor,
+              jeepLocation: (LocationData jeepLocation) {
+
+              }
+            ),
           ),
           SizedBox(
             height: 250,
@@ -259,7 +284,17 @@ class _DashboardPageState extends State<DashboardPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(driverJeep == null? "Select a PUV to Operate":driverJeep!.device_id),
+                      if (driverJeep == null || driverRoute == null)
+                      const Text( "Select a PUV to Operate"),
+
+                      if (driverJeep != null && driverRoute != null)
+                      Row(
+                        children: [
+                          Text(driverJeep!.device_id),
+                          const SizedBox(width: Constants.defaultPadding/2),
+                          Icon(Icons.circle, color: Color(driverRoute!.routeColor), size: 14,)
+                        ],
+                      ),
 
                       const SizedBox(height: Constants.defaultPadding/3),
 
@@ -347,9 +382,31 @@ class _DashboardPageState extends State<DashboardPage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          WidgetButtonBig(widget: const Center(child:  Text("LEAVE\nPUV", textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.w900))), color: driverRoute != null
+                          WidgetButtonBig(
+                            widget: Center(
+                              child:  Text(
+                                "LEAVE\nPUV",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w900,
+                                  color: driverRoute != null
+                                    ? Color(driverRoute!.routeColor)
+                                    : Colors.grey
+                                )
+                              )
+                            ),
+                            color: driverRoute != null
                               ? Color(driverRoute!.routeColor)
-                              : Colors.grey.withOpacity(0.2), function: () => updateDriverJeep(widget.driverAccount.account_email, ""), enabled: widget.driverAccount.jeep_driving != ""),
+                              : Colors.grey.withOpacity(0.2),
+                            outLined: true,
+                            function: () {
+                              setState(() {
+                                operateModeChoice = 2;
+                              });
+                              updateDriverJeep(widget.driverAccount.account_email, "");
+                            },
+                            enabled: widget.driverAccount.jeep_driving != ""
+                          ),
                           Row(
                             children: [
                               WidgetButtonBig(widget: Image.asset('lib/images/accidentNoBG.png', fit: BoxFit.cover), color: const Color(0xffC62828), function: () {}, enabled: widget.driverAccount.jeep_driving != ""),
@@ -368,6 +425,8 @@ class _DashboardPageState extends State<DashboardPage> {
                     ]
                   )
                 ),
+
+                if (driverJeep != null && driverRoute != null)
                 Positioned(
                   top: Constants.defaultPadding/4,
                   right: Constants.defaultPadding/4,
@@ -406,7 +465,7 @@ class _DashboardPageState extends State<DashboardPage> {
                     iconSize: 17,
                     visualDensity: VisualDensity.compact,
                     padding: const EdgeInsets.symmetric(horizontal: Constants.defaultPadding),
-                    tooltip: "Active: Increment/Decrement Passenger Count\nSemi-Active: Full/Not Full Passenger Count\nPassive: Only Location Tracking",
+                    tooltip: "Active: (-/+) Passenger Counting\nSemi-Active: (Full/Available) Passenger Counting\nPassive: Only Location Tracking",
                   )
                 )
               ],

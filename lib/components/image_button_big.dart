@@ -6,13 +6,15 @@ class WidgetButtonBig extends StatelessWidget {
   Function function;
   bool enabled;
   bool isLong;
+  bool outLined;
   WidgetButtonBig({
     super.key,
     required this.widget,
     required this.color,
     required this.function,
     required this.enabled,
-    this.isLong = true
+    this.isLong = true,
+    this.outLined = false
   });
 
   @override
@@ -26,8 +28,20 @@ class WidgetButtonBig extends StatelessWidget {
         : null,
       child: Container(
         decoration: BoxDecoration(
-            color: enabled? color:color.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(10.0)
+            color: !outLined
+              ? enabled
+                ? color
+                : color.withOpacity(0.2)
+              : Colors.transparent,
+            borderRadius: BorderRadius.circular(10.0),
+            border: Border.all(
+              width: 2,
+              color: outLined
+                ? enabled
+                  ? color
+                  : color.withOpacity(0.2)
+                : Colors.transparent,
+        )
         ),
         width: 73,
         height: 73,
