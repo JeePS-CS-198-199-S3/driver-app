@@ -3,9 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:transitrack_driver/components/map_widget.dart';
+import '../components/header.dart';
 import '../components/icon_button_big.dart';
 import '../components/image_button_big.dart';
-import '../components/jeeps_list_widget.dart';
 import '../models/account_model.dart';
 import '../models/jeep_model.dart';
 import '../models/route_model.dart';
@@ -23,6 +23,9 @@ class _DashboardPageState extends State<DashboardPage> {
   late AccountData _driverAccount;
   JeepData? driverJeep;
   RouteData? driverRoute;
+
+  int operateModeChoice = 0;
+  List<OperationModes> operateModes = [OperationModes(name: "Passive", color: Colors.red), OperationModes(name: "Semi-Active", color: Colors.orange), OperationModes(name: "Active", color: Colors.green)];
 
   int passengers = 0;
 
@@ -130,11 +133,25 @@ class _DashboardPageState extends State<DashboardPage> {
     }
   }
 
+  void full() {
+    setState(() {
+      passengers = driverJeep!.max_capacity;
+    });
+  }
+
+  void notFull() {
+    setState(() {
+      passengers = -1;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Column(
         children: [
+          Header(driverAccount: _driverAccount),
+
           Expanded(
             child: MapWidget(),
           ),
@@ -142,6 +159,7 @@ class _DashboardPageState extends State<DashboardPage> {
             height: 250,
             child: Stack(
               children: [
+                if (operateModeChoice == 2)
                   PieChart(
                     swapAnimationDuration: Duration.zero,
                     PieChartData(
@@ -171,6 +189,7 @@ class _DashboardPageState extends State<DashboardPage> {
                       ],
                     ),
                   ),
+                if (operateModeChoice == 2)
                   Column(
                     children: [
                       Center(
@@ -248,18 +267,76 @@ class _DashboardPageState extends State<DashboardPage> {
 
                       const SizedBox(height: Constants.defaultPadding/3),
 
+                      if (operateModeChoice != 0)
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Expanded(
-                            child: IconButtonBig(color: Colors.red, icon: const Icon(Icons.remove), function: () => decrement(), enabled: _driverAccount.jeep_driving != "")
+                            child: operateModeChoice == 1
+                              ? WidgetButtonBig(
+                                widget: const Center(
+                                  child: Text("FULL"),
+                                ),
+                                isLong: false,
+                                color: Colors.red,
+                                function: () => full(),
+                                enabled: _driverAccount.jeep_driving != ""
+                              )
+                              : IconButtonBig(
+                                color: Colors.red,
+                                icon: const Icon(Icons.remove),
+                                function: () => decrement(),
+                                enabled: _driverAccount.jeep_driving != ""
+                              )
                           ),
-                          const SizedBox(width: Constants.defaultPadding*10),
+                          SizedBox(width: Constants.defaultPadding*10,
+                            child: operateModeChoice == 1
+                              ? Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  const Text("PUV is currently"),
+                                  Text(
+                                    passengers == -1
+                                      ? "AVAILABLE"
+                                      : "FULL",
+                                    style: TextStyle(
+                                      color: passengers == -1
+                                        ? Colors.green
+                                        : Colors.red
+                                    )
+                                  )
+                                ],
+                              )
+                              : const SizedBox()
+                          ),
                           Expanded(
-                              child: IconButtonBig(color: Colors.green, icon: const Icon(Icons.add), function: () => increment(), enabled: _driverAccount.jeep_driving != "")
+                            child: operateModeChoice == 1
+                            ? WidgetButtonBig(
+                                widget: const Center(
+                                  child: Text("AVAILABLE"),
+                                ),
+                                isLong: false,
+                                color: Colors.green,
+                                function: () => notFull(),
+                                enabled: _driverAccount.jeep_driving != ""
+                            )
+                            : IconButtonBig(
+                                color: Colors.green,
+                                icon: const Icon(Icons.add),
+                                function: () => increment(),
+                                enabled: _driverAccount.jeep_driving != ""
+                            )
                           ),
                         ],
                       ),
+
+                      if (operateModeChoice == 0)
+                        const SizedBox(
+                          height: 73,
+                          child: Center(
+                            child: Text("BROADCAST MODE IS PASSIVE.\nPASSENGER COUNTING IS DISABLED.", textAlign: TextAlign.center),
+                          ),
+                        ),
 
                       const SizedBox(height: Constants.defaultPadding/3),
 
@@ -296,17 +373,40 @@ class _DashboardPageState extends State<DashboardPage> {
                   right: Constants.defaultPadding/4,
                   child: IconButton(
                     onPressed: () {
-                      AwesomeDialog(
-                        context: context,
-                        keyboardAware: false,
-                        dialogType: DialogType.noHeader,
-                        body: JeepsListWidget(accountData: _driverAccount)
-                      ).show();
+                      if (operateModeChoice < 2) {
+                        setState(() {
+                          operateModeChoice++;
+                        });
+                      } else {
+                        setState(() {
+                          operateModeChoice = 0;
+                        });
+                      }
+
+                      if (operateModeChoice == 0) {
+                        setState(() {
+                          passengers = -2;
+                        });
+                      } else if (operateModeChoice == 1 && passengers < driverJeep!.max_capacity) {
+                        setState(() {
+                          passengers = -1;
+                        });
+                      } else if (passengers < driverJeep!.max_capacity){
+                        setState(() {
+                          passengers = 0;
+                        });
+                      }
                     },
-                    icon: const Text("PUV LIST"),
+                    icon: Row(
+                      children: [
+                        const Text("Broadcast Mode: "),
+                        Text(operateModes[operateModeChoice].name, style: TextStyle(color: operateModes[operateModeChoice].color)),
+                      ],
+                    ),
                     iconSize: 17,
                     visualDensity: VisualDensity.compact,
-                    padding: const EdgeInsets.symmetric(horizontal: Constants.defaultPadding)
+                    padding: const EdgeInsets.symmetric(horizontal: Constants.defaultPadding),
+                    tooltip: "Active: Increment/Decrement Passenger Count\nSemi-Active: Full/Not Full Passenger Count\nPassive: Only Location Tracking",
                   )
                 )
               ],
@@ -328,6 +428,16 @@ class TopClipper extends CustomClipper<Rect> {
   bool shouldReclip(covariant CustomClipper<Rect> oldClipper) {
     return false;
   }
+}
+
+class OperationModes {
+  String name;
+  Color color;
+
+  OperationModes({
+    required this.name,
+    required this.color
+});
 }
 
 

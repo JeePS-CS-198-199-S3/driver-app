@@ -5,18 +5,23 @@ class WidgetButtonBig extends StatelessWidget {
   Color color;
   Function function;
   bool enabled;
+  bool isLong;
   WidgetButtonBig({
     super.key,
     required this.widget,
     required this.color,
     required this.function,
-    required this.enabled
+    required this.enabled,
+    this.isLong = true
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onLongPress: () => enabled
+      onTap: () => enabled && !isLong
+        ? function()
+        : null,
+      onLongPress: () => enabled && isLong
         ? function()
         : null,
       child: Container(

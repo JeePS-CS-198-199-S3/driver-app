@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../components/drawer_widget.dart';
+import '../menu_controller.dart';
 import '../models/account_model.dart';
 import '../style/constants.dart';
 import 'dashboard_page.dart';
@@ -53,10 +55,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Constants.bgColor,
-        appBar: AppBar(
-          backgroundColor: Constants.bgColor,
-          iconTheme: const IconThemeData(color: Colors.white),
-        ),
+        key: context.read<MenuControllers>().scaffoldKey,
         drawer: DrawerWidget(accountData: currentUserFirestore),
         body: currentUserFirestore != null
             ? DashboardPage(driverAccount: currentUserFirestore!)
