@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-class ImageButtonBig extends StatelessWidget {
-  String imagePath;
+class WidgetButtonBig extends StatelessWidget {
+  Widget widget;
   Color color;
   Function function;
   bool enabled;
-  ImageButtonBig({
+  WidgetButtonBig({
     super.key,
-    required this.imagePath,
+    required this.widget,
     required this.color,
     required this.function,
     required this.enabled
@@ -16,10 +16,9 @@ class ImageButtonBig extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => enabled
+      onLongPress: () => enabled
         ? function()
-        : null
-      ,
+        : null,
       child: Container(
         decoration: BoxDecoration(
             color: enabled? color:color.withOpacity(0.2),
@@ -29,7 +28,7 @@ class ImageButtonBig extends StatelessWidget {
         height: 73,
         child: Opacity(
           opacity: enabled? 1:0.2,
-          child: Image.asset(imagePath, fit: BoxFit.cover)),
+          child: widget),
       ),
     );
   }

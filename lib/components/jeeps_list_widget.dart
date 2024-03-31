@@ -1,6 +1,7 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:transitrack_driver/components/square_loader.dart';
 import 'package:transitrack_driver/models/account_model.dart';
 
 import '../models/jeep_driver_model.dart';
@@ -27,8 +28,6 @@ class _JeepsListWidgetState extends State<JeepsListWidget> {
   String searchString = "";
   List<int> showRoutes = [];
   bool showOccupiedPUV = true;
-  bool orderByDescending = true;
-  int orderBy = 0;
 
   // Loading jeeps
   List<JeepDriverData>? jeepDriverData;
@@ -65,10 +64,6 @@ class _JeepsListWidgetState extends State<JeepsListWidget> {
     setState(() {
       jeepDriverData = data;
     });
-  }
-
-  void updateDriverJeep(String plateNumber) async {
-    await AccountData.updateAccountFirestore(widget.accountData.account_email, {'jeep_driving': plateNumber});
   }
 
   @override
@@ -192,8 +187,12 @@ class _JeepsListWidgetState extends State<JeepsListWidget> {
                         : "Vacant"),
                     trailing: Text(routes![jeepDriver.jeepData.route_id].routeName),
                     onLongPress: () {
-                      updateDriverJeep(jeepDriver.jeepData.device_id);
-                      Navigator.of(context).pop();
+                      Loader(context);
+                      updateDriverJeep(widget.accountData.account_email, jeepDriver.jeepData.device_id);
+                      Future.delayed(const Duration(seconds: 1), () {
+                        Navigator.of(context).pop();
+                        Navigator.of(context).pop();
+                      });
                     },
                     dense: true,
                     visualDensity: VisualDensity.compact,

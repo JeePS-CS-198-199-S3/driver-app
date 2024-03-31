@@ -90,3 +90,7 @@ Future<JeepData?> fetchJeepData(String deviceId) async {
     return null;
   }
 }
+
+void updateDriverJeep(String email, String plateNumber) async {
+  await AccountData.updateAccountFirestore(email, {'jeep_driving': plateNumber});
+}
