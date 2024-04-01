@@ -1,8 +1,4 @@
-import 'dart:async';
-
-import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
@@ -44,15 +40,15 @@ class _DashboardPageState extends State<DashboardPage> {
   void initState() {
     super.initState();
 
+    checkAccountType(context, widget.driverAccount);
+
     setState(() {
       _driverAccount = widget.driverAccount;
     });
 
-    if (_driverAccount.jeep_driving != null) {
+    if (_driverAccount.jeep_driving != "") {
       fetchJeep();
     }
-
-    checkAccountType(context, widget.driverAccount);
   }
 
 
@@ -122,6 +118,7 @@ class _DashboardPageState extends State<DashboardPage> {
       setState(() {
         driverRoute = routeData;
       });
+
     } else {
       setState(() {
         driverRoute = null;
@@ -159,6 +156,11 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Column(
@@ -167,6 +169,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
           Expanded(
             child: MapWidget(
+              key: mapWidgetKey,
               jeepColor: driverRoute?.routeColor,
               jeepLocation: (LocationData jeepLocation) {
                 try {
@@ -305,7 +308,7 @@ class _DashboardPageState extends State<DashboardPage> {
                       const SizedBox(height: Constants.defaultPadding/3),
 
                       if (operateModeChoice != 0)
-                      Row(
+                        Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Expanded(
@@ -317,13 +320,13 @@ class _DashboardPageState extends State<DashboardPage> {
                                 isLong: false,
                                 color: Colors.red,
                                 function: () => full(),
-                                enabled: _driverAccount.jeep_driving != ""
+                                enabled: driverRoute != null && driverJeep != null
                               )
                               : IconButtonBig(
                                 color: Colors.red,
                                 icon: const Icon(Icons.remove),
                                 function: () => decrement(),
-                                enabled: _driverAccount.jeep_driving != ""
+                                enabled: driverRoute != null && driverJeep != null
                               )
                           ),
                           SizedBox(width: Constants.defaultPadding*10,
@@ -355,13 +358,13 @@ class _DashboardPageState extends State<DashboardPage> {
                                 isLong: false,
                                 color: Colors.green,
                                 function: () => notFull(),
-                                enabled: _driverAccount.jeep_driving != ""
+                                enabled: driverRoute != null && driverJeep != null
                             )
                             : IconButtonBig(
                                 color: Colors.green,
                                 icon: const Icon(Icons.add),
                                 function: () => increment(),
-                                enabled: _driverAccount.jeep_driving != ""
+                                enabled: driverRoute != null && driverJeep != null
                             )
                           ),
                         ],
@@ -391,13 +394,13 @@ class _DashboardPageState extends State<DashboardPage> {
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontWeight: FontWeight.w900,
-                                  color: driverRoute != null
+                                  color: driverRoute != null && driverJeep != null
                                     ? Color(driverRoute!.routeColor)
                                     : Colors.grey
                                 )
                               )
                             ),
-                            color: driverRoute != null
+                            color: driverRoute != null && driverJeep != null
                               ? Color(driverRoute!.routeColor)
                               : Colors.grey.withOpacity(0.2),
                             outLined: true,
@@ -418,9 +421,13 @@ class _DashboardPageState extends State<DashboardPage> {
                                         fit: BoxFit.cover),
                                     color: const Color(0xffC62828),
                                     function: () {
-                                      sendReport(context, JeepDriverData(jeepData: driverJeep!, driverData: _driverAccount), 1);
+                                      sendReport(context, JeepDriverData(jeepData: driverJeep!, driverData: _driverAccount), 1).then((value) {
+                                        if (value) {
+                                          mapWidgetKey.currentState?.rippleReport();
+                                        }
+                                      });
                                     },
-                                    enabled: widget.driverAccount.jeep_driving != "",
+                                    enabled: driverRoute != null && driverJeep != null,
                                     timed: true,
                                   ),
 
@@ -431,9 +438,13 @@ class _DashboardPageState extends State<DashboardPage> {
                                       fit: BoxFit.cover),
                                     color: const Color(0xffC62828),
                                     function: () {
-                                      sendReport(context, JeepDriverData(jeepData: driverJeep!, driverData: _driverAccount), 2);
+                                      sendReport(context, JeepDriverData(jeepData: driverJeep!, driverData: _driverAccount), 2).then((value) {
+                                        if (value) {
+                                          mapWidgetKey.currentState?.rippleReport();
+                                        }
+                                      });
                                     },
-                                    enabled: widget.driverAccount.jeep_driving != "",
+                                    enabled: driverRoute != null && driverJeep != null,
                                     timed: true,
                                   ),
 
@@ -444,9 +455,13 @@ class _DashboardPageState extends State<DashboardPage> {
                                       fit: BoxFit.cover),
                                     color: const Color(0xffC62828),
                                     function: () {
-                                      sendReport(context, JeepDriverData(jeepData: driverJeep!, driverData: _driverAccount), 3);
+                                      sendReport(context, JeepDriverData(jeepData: driverJeep!, driverData: _driverAccount), 3).then((value) {
+                                        if (value) {
+                                          mapWidgetKey.currentState?.rippleReport();
+                                        }
+                                      });
                                     },
-                                    enabled: widget.driverAccount.jeep_driving != "",
+                                    enabled: driverRoute != null && driverJeep != null,
                                     timed: true
                                   )
                                 ],
@@ -531,10 +546,3 @@ class OperationModes {
     required this.color
 });
 }
-
-
-
-
-
-
-

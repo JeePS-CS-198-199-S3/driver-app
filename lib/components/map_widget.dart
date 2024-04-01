@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -10,14 +11,13 @@ import 'package:mapbox_gl/mapbox_gl.dart';
 import '../services/device_location/request_permission.dart';
 import '../services/int_to_hex.dart';
 import '../services/mapbox.dart';
+import '../services/mapbox/add_image_assets.dart';
+import '../services/mapbox/animate_ripple.dart';
 
 class MapWidget extends StatefulWidget {
   final int? jeepColor;
   final ValueChanged<LocationData> jeepLocation;
-  const MapWidget({super.key,
-    required this.jeepColor,
-    required this.jeepLocation
-  });
+  MapWidget({Key? key, this.jeepColor, required this.jeepLocation}) : super(key: key,);
 
   @override
   State<MapWidget> createState() => _MapWidgetState();
@@ -40,6 +40,7 @@ class _MapWidgetState extends State<MapWidget> with TickerProviderStateMixin {
   late MapboxMapController _mapController;
 
   // Device Location
+  StreamSubscription<LocationData>? locationListener;
   Location location = Location();
   LatLng? deviceLocation;
   double? heading;
@@ -50,18 +51,31 @@ class _MapWidgetState extends State<MapWidget> with TickerProviderStateMixin {
   void initState() {
     super.initState();
 
-    setState(() {
-      _jeepColor = widget.jeepColor;
-    });
+    location.enableBackgroundMode();
 
     location.changeSettings(
       accuracy: LocationAccuracy.high,
       distanceFilter: 5,
     );
+
+    setState(() {
+      _jeepColor = widget.jeepColor;
+    });
+
+
+  }
+
+  @override
+  void dispose() {
+    _mapController.dispose();
+    locationListener?.cancel();
+
+    super.dispose();
   }
 
   @override
   void didUpdateWidget(covariant MapWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
     if (_jeepColor != widget.jeepColor) {
       setState(() {
         _jeepColor = widget.jeepColor;
@@ -87,7 +101,7 @@ class _MapWidgetState extends State<MapWidget> with TickerProviderStateMixin {
   }
 
   void _listenDeviceLocation() {
-    location.onLocationChanged.listen((LocationData currentLocation) {
+    locationListener = location.onLocationChanged.listen((LocationData currentLocation) {
       setState(() {
         deviceLocation = LatLng(currentLocation.latitude!, currentLocation.longitude!);
         heading = currentLocation.heading!;
@@ -99,16 +113,19 @@ class _MapWidgetState extends State<MapWidget> with TickerProviderStateMixin {
       } else {
         _updateDeviceCircle();
       }
-
     });
   }
 
-  Future<void> addImageFromAsset() async {
-    final ByteData bytes1 = await rootBundle.load("lib/images/jeep.png");
-    final Uint8List list1 = bytes1.buffer.asUint8List();
+  Future<void> rippleReport() async {
+    for (int i = 0; i < 3; i++) {
+      animateRipple(deviceLocation!, _mapController, this);
 
-    await _mapController.addImage("jeepTop", list1);
+      await Future.delayed(
+          const Duration(milliseconds: 2000));
+    }
+
   }
+
 
   void startListening() async
   {
@@ -214,13 +231,6 @@ class _MapWidgetState extends State<MapWidget> with TickerProviderStateMixin {
   }
 
   @override
-  void dispose() {
-    _mapController.dispose();
-
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return MapboxMap(
       accessToken: accessToken,
@@ -232,7 +242,7 @@ class _MapWidgetState extends State<MapWidget> with TickerProviderStateMixin {
         _mapController = controller;
       },
       onStyleLoadedCallback: () async {
-        await addImageFromAsset();
+        await addImagesFromAsset(_mapController);
         _mapController.setSymbolIconAllowOverlap(true);
         _mapController.setSymbolTextAllowOverlap(true);
         _mapController.setSymbolIconIgnorePlacement(true);
@@ -245,3 +255,13 @@ class _MapWidgetState extends State<MapWidget> with TickerProviderStateMixin {
     );
   }
 }
+
+class RippleTween extends Tween<double> {
+  RippleTween({required double begin, required double end})
+      : super(begin: begin, end: end);
+
+  @override
+  double lerp(double t) => lerpDouble(begin!, end!, t)!;
+}
+
+final GlobalKey<_MapWidgetState> mapWidgetKey = GlobalKey<_MapWidgetState>();

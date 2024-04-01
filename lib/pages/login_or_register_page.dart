@@ -21,6 +21,11 @@ class _LoginOrRegisterPageState extends State<LoginOrRegisterPage> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (showLoginPage) {
       return LoginPage(

@@ -6,11 +6,11 @@ import 'package:transitrack_driver/models/jeep_driver_model.dart';
 import '../components/square_loader.dart';
 import '../style/constants.dart';
 
-void sendReport(BuildContext context, JeepDriverData jeepDriverData, int reportType) async {
+Future<bool> sendReport(BuildContext context, JeepDriverData jeepDriverData, int reportType) async {
   // show loading circle
   Loader(context);
 
-  // report field is not empty
+  bool success = false;
 
   try {
     // Add a new document with auto-generated ID
@@ -35,6 +35,7 @@ void sendReport(BuildContext context, JeepDriverData jeepDriverData, int reportT
       desc: "Your report has been broadcasted to your route manager and all operating drivers in your route.",
       padding: const EdgeInsets.only(bottom: Constants.defaultPadding, left: Constants.defaultPadding, right: Constants.defaultPadding)
     ).show();
+    success = true;
   } catch (e) {
     // pop loading circle
     Navigator.pop(context);
@@ -46,4 +47,9 @@ void sendReport(BuildContext context, JeepDriverData jeepDriverData, int reportT
     ).show();
   }
 
+  if (success) {
+    return true;
+  } else {
+    return false;
+  }
 }
