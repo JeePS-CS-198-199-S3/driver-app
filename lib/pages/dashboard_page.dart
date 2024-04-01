@@ -34,6 +34,7 @@ class _DashboardPageState extends State<DashboardPage> {
     OperationModes(name: "Active", color: Colors.green)
   ];
 
+
   int passengers = 0;
 
   @override
@@ -170,7 +171,7 @@ class _DashboardPageState extends State<DashboardPage> {
           Expanded(
             child: MapWidget(
               key: mapWidgetKey,
-              jeepColor: driverRoute?.routeColor,
+              routeData: driverRoute,
               jeepLocation: (LocationData jeepLocation) {
                 try {
                   JeepData.updateJeepFirestore(driverJeep!.device_id, {

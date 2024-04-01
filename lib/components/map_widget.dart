@@ -1,23 +1,26 @@
 import 'dart:async';
-import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:location/location.dart';
 import 'package:mapbox_gl/mapbox_gl.dart';
 
+import '../models/ping_model.dart';
+import '../models/route_model.dart';
 import '../services/device_location/request_permission.dart';
 import '../services/int_to_hex.dart';
 import '../services/mapbox.dart';
 import '../services/mapbox/add_image_assets.dart';
 import '../services/mapbox/animate_ripple.dart';
+import '../services/mapbox/minute_old_checker.dart';
 
 class MapWidget extends StatefulWidget {
-  final int? jeepColor;
+  final RouteData? routeData;
   final ValueChanged<LocationData> jeepLocation;
-  MapWidget({Key? key, this.jeepColor, required this.jeepLocation}) : super(key: key,);
+  MapWidget({Key? key, this.routeData, required this.jeepLocation}) : super(key: key,);
 
   @override
   State<MapWidget> createState() => _MapWidgetState();
@@ -35,17 +38,24 @@ class LatLngTween extends Tween<LatLng> {
 }
 
 class _MapWidgetState extends State<MapWidget> with TickerProviderStateMixin {
-  int? _jeepColor;
+  RouteData? _routeData;
 
   late MapboxMapController _mapController;
 
+  // Ping Fetching
+  late StreamSubscription pingListener;
+  List<PingData> pings = [];
+  late Timer pingTimer;
+
   // Device Location
-  StreamSubscription<LocationData>? locationListener;
+  late StreamSubscription<LocationData> locationListener;
   Location location = Location();
   LatLng? deviceLocation;
   double? heading;
   Circle? deviceCircle;
   Symbol? deviceSymbol;
+
+  bool mapLoaded = false;
 
   @override
   void initState() {
@@ -59,30 +69,43 @@ class _MapWidgetState extends State<MapWidget> with TickerProviderStateMixin {
     );
 
     setState(() {
-      _jeepColor = widget.jeepColor;
+      _routeData = widget.routeData;
     });
+    if (mapLoaded) {
+      refreshLineAndPingLayer();
+    }
 
-
+    pingTimer = Timer.periodic(const Duration(seconds: 1), (Timer timer) {
+      if (mapLoaded && _routeData != null) {
+        setState(() {
+          pings = pings.where((element) => minuteOldChecker(element.ping_timestamp.toDate())).toList();
+        });
+        _mapController.setGeoJsonSource("pings", pingListToGeoJSON(pings));
+      }
+    });
   }
 
   @override
   void dispose() {
     _mapController.dispose();
-    locationListener?.cancel();
-
+    locationListener.cancel();
+    pingListener.cancel();
+    pingTimer.cancel();
     super.dispose();
   }
 
   @override
   void didUpdateWidget(covariant MapWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (_jeepColor != widget.jeepColor) {
+    if (_routeData != widget.routeData) {
       setState(() {
-        _jeepColor = widget.jeepColor;
+        _routeData = widget.routeData;
       });
 
+      refreshLineAndPingLayer();
+
       if (deviceLocation != null) {
-        if (_jeepColor != null) {
+        if (_routeData != null) {
           if (deviceCircle != null) {
             _mapController.removeCircle(deviceCircle!);
             deviceCircle = null;
@@ -100,6 +123,22 @@ class _MapWidgetState extends State<MapWidget> with TickerProviderStateMixin {
     }
   }
 
+  void listenToPingsFirestore() {
+    pingListener = FirebaseFirestore.instance
+        .collection('pings')
+        .where('ping_route', isEqualTo: widget.routeData!.routeId)
+        .snapshots()
+        .listen((QuerySnapshot snapshot) {
+      if (snapshot.docs.isNotEmpty) {
+        setState(() {
+          pings =
+              snapshot.docs.map((doc) => PingData.fromFirestore(doc)).where((element) => minuteOldChecker(element.ping_timestamp.toDate())).toList();
+        });
+        _mapController.setGeoJsonSource("pings", pingListToGeoJSON(pings));
+      }
+    });
+  }
+
   void _listenDeviceLocation() {
     locationListener = location.onLocationChanged.listen((LocationData currentLocation) {
       setState(() {
@@ -107,7 +146,7 @@ class _MapWidgetState extends State<MapWidget> with TickerProviderStateMixin {
         heading = currentLocation.heading!;
       });
 
-      if (_jeepColor != null) {
+      if (_routeData != null) {
         _updateDeviceJeep();
         widget.jeepLocation(currentLocation);
       } else {
@@ -167,7 +206,7 @@ class _MapWidgetState extends State<MapWidget> with TickerProviderStateMixin {
           textField: "▬▬",
           textLetterSpacing: -0.35,
           textSize: 30,
-          textColor: _jeepColor != null? intToHexColor(_jeepColor!):intToHexColor(Colors.grey.value),
+          textColor: _routeData != null? intToHexColor(_routeData!.routeColor):intToHexColor(Colors.grey.value),
           textRotate: heading! + 90,
           iconRotate: heading,
           iconSize: 2))
@@ -203,6 +242,27 @@ class _MapWidgetState extends State<MapWidget> with TickerProviderStateMixin {
     animationController.forward();
   }
 
+  void refreshLineAndPingLayer() {
+    if (_routeData != null) {
+      _mapController.clearLines();
+      _mapController.addLines(
+          [LineOptions(
+              lineWidth: 4.0,
+              lineColor: intToHexColor(_routeData!.routeColor),
+              lineOpacity: 0.5,
+              geometry: _routeData!.routeCoordinates
+          )]
+      );
+      addGeojsonCluster(_mapController, _routeData!);
+      listenToPingsFirestore();
+    } else {
+      _mapController.clearLines();
+      pingListener.cancel();
+      pings.clear();
+      _mapController.setGeoJsonSource("pings", pingListToGeoJSON(pings));
+    }
+  }
+
   void _animateSymbolMovement(LatLng from, LatLng to, Symbol symbol) {
     final animationController = AnimationController(
       vsync: this,
@@ -214,7 +274,7 @@ class _MapWidgetState extends State<MapWidget> with TickerProviderStateMixin {
     ));
 
     _mapController.updateSymbol(
-        symbol, SymbolOptions(textRotate: heading! + 90, iconRotate: heading));
+        symbol, SymbolOptions(textRotate: heading! + 90, iconRotate: heading, textColor: _routeData != null? intToHexColor(_routeData!.routeColor):intToHexColor(Colors.grey.value)));
 
     animation.addListener(() {
       _mapController.updateSymbol(
@@ -240,6 +300,10 @@ class _MapWidgetState extends State<MapWidget> with TickerProviderStateMixin {
       ),
       onMapCreated: (controller) {
         _mapController = controller;
+        setState(() {
+          mapLoaded = true;
+        });
+        refreshLineAndPingLayer();
       },
       onStyleLoadedCallback: () async {
         await addImagesFromAsset(_mapController);
