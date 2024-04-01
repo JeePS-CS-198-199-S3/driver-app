@@ -67,19 +67,21 @@ class _MapWidgetState extends State<MapWidget> with TickerProviderStateMixin {
         _jeepColor = widget.jeepColor;
       });
 
-      if (_jeepColor != null) {
-        if (deviceCircle != null) {
-          _mapController.removeCircle(deviceCircle!);
-          deviceCircle = null;
-        }
-        _updateDeviceJeep();
-      } else {
-        if (deviceSymbol != null) {
-          _mapController.removeSymbol(deviceSymbol!);
-          deviceSymbol = null;
-        }
+      if (deviceLocation != null) {
+        if (_jeepColor != null) {
+          if (deviceCircle != null) {
+            _mapController.removeCircle(deviceCircle!);
+            deviceCircle = null;
+          }
+          _updateDeviceJeep();
+        } else {
+          if (deviceSymbol != null) {
+            _mapController.removeSymbol(deviceSymbol!);
+            deviceSymbol = null;
+          }
 
-        _updateDeviceCircle();
+          _updateDeviceCircle();
+        }
       }
     }
   }

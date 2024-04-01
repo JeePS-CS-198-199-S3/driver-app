@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -6,12 +8,14 @@ import 'package:flutter/material.dart';
 import 'package:location/location.dart';
 import 'package:transitrack_driver/components/map_widget.dart';
 import 'package:transitrack_driver/models/jeep_driver_model.dart';
+import 'package:transitrack_driver/services/account_verification.dart';
 import '../components/header.dart';
 import '../components/icon_button_big.dart';
 import '../components/image_button_big.dart';
 import '../models/account_model.dart';
 import '../models/jeep_model.dart';
 import '../models/route_model.dart';
+import '../services/send_report.dart';
 import '../style/constants.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -48,7 +52,7 @@ class _DashboardPageState extends State<DashboardPage> {
       fetchJeep();
     }
 
-    checkAccountType();
+    checkAccountType(context, widget.driverAccount);
   }
 
 
@@ -71,19 +75,7 @@ class _DashboardPageState extends State<DashboardPage> {
     }
   }
 
-  void checkAccountType() {
-    if (widget.driverAccount.account_type != 1) {
-      Future.delayed(const Duration(seconds: 1), () {
-        AwesomeDialog(
-          context: context,
-          dialogType: DialogType.error,
-          animType: AnimType.scale,
-          desc: 'This app is only intended for the JeePS drivers. Please use a driver account.',
-          onDismissCallback: (_) => FirebaseAuth.instance.signOut(),
-        ).show();
-      });
-    }
-  }
+
 
   void fetchJeep() async {
     if (_driverAccount.jeep_driving != "") {
@@ -417,17 +409,48 @@ class _DashboardPageState extends State<DashboardPage> {
                             },
                             enabled: widget.driverAccount.jeep_driving != ""
                           ),
-                          Row(
+                          Stack(
                             children: [
-                              WidgetButtonBig(widget: Image.asset('lib/images/accidentNoBG.png', fit: BoxFit.cover), color: const Color(0xffC62828), function: () {}, enabled: widget.driverAccount.jeep_driving != ""),
+                              Row(
+                                children: [
+                                  WidgetButtonBig(
+                                    widget: Image.asset('lib/images/accidentNoBG.png',
+                                        fit: BoxFit.cover),
+                                    color: const Color(0xffC62828),
+                                    function: () {
+                                      sendReport(context, JeepDriverData(jeepData: driverJeep!, driverData: _driverAccount), 1);
+                                    },
+                                    enabled: widget.driverAccount.jeep_driving != "",
+                                    timed: true,
+                                  ),
 
-                              const SizedBox(width: Constants.defaultPadding/2),
+                                  const SizedBox(width: Constants.defaultPadding/2),
 
-                              WidgetButtonBig(widget: Image.asset('lib/images/crimeNoBG.png', fit: BoxFit.cover), color: const Color(0xffC62828), function: () {}, enabled: widget.driverAccount.jeep_driving != ""),
+                                  WidgetButtonBig(
+                                    widget: Image.asset('lib/images/crimeNoBG.png',
+                                      fit: BoxFit.cover),
+                                    color: const Color(0xffC62828),
+                                    function: () {
+                                      sendReport(context, JeepDriverData(jeepData: driverJeep!, driverData: _driverAccount), 2);
+                                    },
+                                    enabled: widget.driverAccount.jeep_driving != "",
+                                    timed: true,
+                                  ),
 
-                              const SizedBox(width: Constants.defaultPadding/2),
+                                  const SizedBox(width: Constants.defaultPadding/2),
 
-                              WidgetButtonBig(widget: Image.asset('lib/images/mechErrorNoBG.png', fit: BoxFit.cover), color: const Color(0xffC62828), function: () {}, enabled: widget.driverAccount.jeep_driving != "")
+                                  WidgetButtonBig(
+                                    widget: Image.asset('lib/images/mechErrorNoBG.png',
+                                      fit: BoxFit.cover),
+                                    color: const Color(0xffC62828),
+                                    function: () {
+                                      sendReport(context, JeepDriverData(jeepData: driverJeep!, driverData: _driverAccount), 3);
+                                    },
+                                    enabled: widget.driverAccount.jeep_driving != "",
+                                    timed: true
+                                  )
+                                ],
+                              ),
                             ],
                           )
                         ],
