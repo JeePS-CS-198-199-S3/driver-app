@@ -14,6 +14,7 @@ import '../components/image_button_big.dart';
 import '../models/account_model.dart';
 import '../models/jeep_model.dart';
 import '../models/route_model.dart';
+import '../services/format_time.dart';
 import '../services/send_report.dart';
 import '../style/constants.dart';
 
@@ -181,6 +182,25 @@ class _DashboardPageState extends State<DashboardPage> {
       child: Column(
         children: [
           Header(driverAccount: _driverAccount),
+
+          const Divider(color: Colors.white, height: 0, indent: Constants.defaultPadding, endIndent: Constants.defaultPadding),
+
+          SizedBox(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: Constants.defaultPadding, vertical: Constants.defaultPadding / 2),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text("Regular Fare: ${driverRoute != null? "₱ ${driverRoute!.routeFare}" : "NA"}", style: const TextStyle(fontSize: 10)),
+
+                  if (driverRoute != null)
+                  Text(formatTime(driverRoute!.routeTime), style: const TextStyle(fontSize: 10)),
+
+                  Text("Discounted: ${driverRoute != null? "₱ ${driverRoute!.routeFareDiscounted}" : "NA"}", style: const TextStyle(fontSize: 10))
+                ]
+              ),
+            )
+          ),
 
           Expanded(
             child: MapWidget(
