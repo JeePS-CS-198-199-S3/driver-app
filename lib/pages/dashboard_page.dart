@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -26,7 +28,10 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   late AccountData _driverAccount;
   LatLng? deviceLocation;
+
   JeepData? driverJeep;
+
+  late StreamSubscription routeListener;
   RouteData? driverRoute;
 
   int operateModeChoice = 2;
@@ -100,7 +105,7 @@ class _DashboardPageState extends State<DashboardPage> {
           });
         }
 
-        fetchRoute();
+        listenToRoute();
       } else {
         setState(() {
           driverJeep = null;
@@ -109,24 +114,30 @@ class _DashboardPageState extends State<DashboardPage> {
     } else {
       setState(() {
         driverJeep = null;
+        routeListener.cancel();
         driverRoute = null;
       });
     }
   }
 
-  void fetchRoute() async {
-    RouteData? routeData = await RouteData.fetchRouteData(driverJeep!.route_id);
-
-    if (routeData != null) {
-      setState(() {
-        driverRoute = routeData;
-      });
-
-    } else {
-      setState(() {
-        driverRoute = null;
-      });
-    }
+  void listenToRoute() async {
+    routeListener = FirebaseFirestore.instance
+        .collection('routes')
+        .where('route_id', isEqualTo: driverJeep!.route_id)
+        .limit(1)
+        .snapshots()
+        .listen((QuerySnapshot snapshot) {
+      if (snapshot.docs.isNotEmpty) {
+        setState(() {
+          driverRoute =
+              snapshot.docs.map((doc) => RouteData.fromFirestore(doc)).first;
+        });
+      } else {
+        setState(() {
+          driverRoute = null;
+        });
+      }
+    });
   }
 
   void increment() {
@@ -160,6 +171,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
   @override
   void dispose() {
+    routeListener.cancel();
     super.dispose();
   }
 
