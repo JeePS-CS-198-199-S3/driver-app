@@ -48,8 +48,9 @@ class _JeepsListWidgetState extends State<JeepsListWidget> {
 
     setState(() {
       routes = data;
-      showRoutes = routes!.map((e) => e.routeId).toList();
     });
+
+    showRoutes.add(widget.accountData.route_id);
 
     loadJeeps();
   }

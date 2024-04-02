@@ -74,9 +74,7 @@ class _AccountStreamState extends State<AccountStream> {
               ),
 
               Text(
-                  "${widget.user!.jeep_driving == ""
-                      ? "Not operating"
-                      : "Operating"} ${AccountData.accountType[widget.user!.account_type]}",
+                  "${widget.route != null? "${widget.route!.routeName} ":""}${AccountData.accountType[widget.user!.account_type]}",
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis),
             ],

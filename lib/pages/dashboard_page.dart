@@ -32,7 +32,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
   JeepData? driverJeep;
 
-  late StreamSubscription routeListener;
+  StreamSubscription? routeListener;
   RouteData? driverRoute;
 
   int operateModeChoice = 2;
@@ -115,7 +115,7 @@ class _DashboardPageState extends State<DashboardPage> {
     } else {
       setState(() {
         driverJeep = null;
-        routeListener.cancel();
+        routeListener?.cancel();
         driverRoute = null;
       });
     }
@@ -172,7 +172,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
   @override
   void dispose() {
-    routeListener.cancel();
+    routeListener?.cancel();
     super.dispose();
   }
 
@@ -181,7 +181,7 @@ class _DashboardPageState extends State<DashboardPage> {
     return SafeArea(
       child: Column(
         children: [
-          Header(driverAccount: _driverAccount),
+          Header(driverAccount: _driverAccount, routeData: driverRoute),
 
           const Divider(color: Colors.white, height: 0, indent: Constants.defaultPadding, endIndent: Constants.defaultPadding),
 
@@ -219,7 +219,7 @@ class _DashboardPageState extends State<DashboardPage> {
                     'timestamp': FieldValue.serverTimestamp()
                   });
                 } catch (e) {
-                  print("Error Updating Jeep: $e");
+                  print("Error: ${e.toString()}");
                 }
               }
             ),
@@ -332,13 +332,7 @@ class _DashboardPageState extends State<DashboardPage> {
                       const Text( "Select a PUV to Operate"),
 
                       if (driverJeep != null && driverRoute != null)
-                      Row(
-                        children: [
-                          Text(driverJeep!.device_id),
-                          const SizedBox(width: Constants.defaultPadding/2),
-                          Icon(Icons.circle, color: Color(driverRoute!.routeColor), size: 14,)
-                        ],
-                      ),
+                        Text(driverJeep!.device_id),
 
                       const SizedBox(height: Constants.defaultPadding/3),
 

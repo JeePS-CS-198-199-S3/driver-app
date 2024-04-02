@@ -35,6 +35,8 @@ class _WidgetButtonBigState extends State<WidgetButtonBig> {
   @override
   void dispose() {
     _cooldownTimer?.cancel();
+
+    super.dispose();
   }
 
   void _startCooldownTimer() {

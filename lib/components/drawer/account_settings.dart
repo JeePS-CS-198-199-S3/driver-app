@@ -124,7 +124,7 @@ class AccountSettings extends StatelessWidget {
               color: Constants.secondaryColor,
               borderRadius: BorderRadius.circular(3),
             ),
-            child: Text(account.account_email, style: TextStyle(fontSize: 15),),
+            child: Text(account.account_email, style: const TextStyle(fontSize: 15),),
           ),
           const SizedBox(height: Constants.defaultPadding),
           Container(
@@ -157,14 +157,14 @@ class AccountSettings extends StatelessWidget {
           const SizedBox(height: Constants.defaultPadding * 2),
           Row(
             children: [
-              Expanded(
-                child: Button(
-                    onTap: deleteAcc,
-                    widget: const Text("Delete"),
-                  color: Colors.red,
-                ),
-              ),
-              const SizedBox(width: Constants.defaultPadding),
+              // Expanded(
+              //   child: Button(
+              //       onTap: deleteAcc,
+              //       widget: const Text("Delete"),
+              //     color: Colors.red,
+              //   ),
+              // ),
+              // const SizedBox(width: Constants.defaultPadding),
               Expanded(
                 child: Button(
                     onTap: update,

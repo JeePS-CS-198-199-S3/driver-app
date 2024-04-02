@@ -274,6 +274,8 @@ class _MapWidgetState extends State<MapWidget> with TickerProviderStateMixin {
           target: initialCameraPosition,
           zoom: zoom
       ),
+      rotateGesturesEnabled: false,
+      tiltGesturesEnabled: false,
       onMapCreated: (controller) {
         _mapController = controller;
         setState(() {
@@ -293,8 +295,6 @@ class _MapWidgetState extends State<MapWidget> with TickerProviderStateMixin {
         }));
       },
       styleString: mapStyle,
-      rotateGesturesEnabled: false,
-      tiltGesturesEnabled: false,
     );
   }
 }
