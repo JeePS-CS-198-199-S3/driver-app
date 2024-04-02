@@ -1,40 +1,31 @@
 import 'dart:async';
-import 'dart:ui';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:location/location.dart';
 import 'package:mapbox_gl/mapbox_gl.dart';
 
+import '../models/account_model.dart';
 import '../models/ping_model.dart';
+import '../models/report_model.dart';
 import '../models/route_model.dart';
 import '../services/device_location/request_permission.dart';
 import '../services/int_to_hex.dart';
 import '../services/mapbox.dart';
 import '../services/mapbox/add_image_assets.dart';
+import '../services/mapbox/animate_circle_movement.dart';
 import '../services/mapbox/animate_ripple.dart';
+import '../services/mapbox/animate_symbol_movement.dart';
 import '../services/mapbox/minute_old_checker.dart';
 
 class MapWidget extends StatefulWidget {
+  final AccountData driverData;
   final RouteData? routeData;
   final ValueChanged<LocationData> jeepLocation;
-  MapWidget({Key? key, this.routeData, required this.jeepLocation}) : super(key: key,);
+  MapWidget({Key? key, required this.driverData, required this.routeData, required this.jeepLocation}) : super(key: key,);
 
   @override
   State<MapWidget> createState() => _MapWidgetState();
-}
-
-class LatLngTween extends Tween<LatLng> {
-  LatLngTween({required LatLng begin, required LatLng end})
-      : super(begin: begin, end: end);
-
-  @override
-  LatLng lerp(double t) => LatLng(
-    lerpDouble(begin!.latitude, end!.latitude, t)!,
-    lerpDouble(begin!.longitude, end!.longitude, t)!,
-  );
 }
 
 class _MapWidgetState extends State<MapWidget> with TickerProviderStateMixin {
@@ -45,7 +36,12 @@ class _MapWidgetState extends State<MapWidget> with TickerProviderStateMixin {
   // Ping Fetching
   late StreamSubscription pingListener;
   List<PingData> pings = [];
-  late Timer pingTimer;
+  late Timer timer;
+
+  // SOS Fetching
+  late StreamSubscription SOSListener;
+  List<ReportData> SOSList = [];
+  bool SOSLayerSetup = false;
 
   // Device Location
   late StreamSubscription<LocationData> locationListener;
@@ -75,12 +71,16 @@ class _MapWidgetState extends State<MapWidget> with TickerProviderStateMixin {
       refreshLineAndPingLayer();
     }
 
-    pingTimer = Timer.periodic(const Duration(seconds: 1), (Timer timer) {
+    timer = Timer.periodic(const Duration(seconds: 1), (Timer timer) {
       if (mapLoaded && _routeData != null) {
         setState(() {
           pings = pings.where((element) => minuteOldChecker(element.ping_timestamp.toDate())).toList();
+          SOSList = SOSList.where((element) => minuteOldChecker(element.timestamp.toDate())).toList();
         });
         _mapController.setGeoJsonSource("pings", pingListToGeoJSON(pings));
+        _mapController.setGeoJsonSource("accidents", reportListToGeoJSON(SOSList.where((element) => element.report_type == 3).toList()));
+        _mapController.setGeoJsonSource("crime", reportListToGeoJSON(SOSList.where((element) => element.report_type == 1).toList()));
+        _mapController.setGeoJsonSource("mechError", reportListToGeoJSON(SOSList.where((element) => element.report_type == 2).toList()));
       }
     });
   }
@@ -90,7 +90,8 @@ class _MapWidgetState extends State<MapWidget> with TickerProviderStateMixin {
     _mapController.dispose();
     locationListener.cancel();
     pingListener.cancel();
-    pingTimer.cancel();
+    SOSListener.cancel();
+    timer.cancel();
     super.dispose();
   }
 
@@ -123,10 +124,35 @@ class _MapWidgetState extends State<MapWidget> with TickerProviderStateMixin {
     }
   }
 
+  void listenToReportsFirestore() {
+    if (_routeData != null) {
+      SOSListener = FirebaseFirestore.instance
+          .collection('reports')
+          .where('report_sender', isNotEqualTo: widget.driverData.account_email)
+          .where('report_route', isEqualTo: _routeData!.routeId)
+          .snapshots()
+          .listen((QuerySnapshot snapshot) {
+        if (snapshot.docs.isNotEmpty) {
+          setState(() {
+            SOSList =
+                snapshot.docs.map((doc) => ReportData.fromFirestore(doc)).where((element) => minuteOldChecker(element.timestamp.toDate())).toList();
+          });
+          _mapController.setGeoJsonSource("accidents", reportListToGeoJSON(SOSList.where((element) => element.report_type == 3).toList()));
+          _mapController.setGeoJsonSource("crime", reportListToGeoJSON(SOSList.where((element) => element.report_type == 1).toList()));
+          _mapController.setGeoJsonSource("mechError", reportListToGeoJSON(SOSList.where((element) => element.report_type == 2).toList()));
+        }
+      });
+    } else {
+      SOSListener.cancel();
+      SOSList.clear();
+      _mapController.setGeoJsonSource("SOS-accidents", reportListToGeoJSON([]));
+    }
+  }
+
   void listenToPingsFirestore() {
     pingListener = FirebaseFirestore.instance
         .collection('pings')
-        .where('ping_route', isEqualTo: widget.routeData!.routeId)
+        .where('ping_route', isEqualTo: _routeData!.routeId)
         .snapshots()
         .listen((QuerySnapshot snapshot) {
       if (snapshot.docs.isNotEmpty) {
@@ -155,14 +181,13 @@ class _MapWidgetState extends State<MapWidget> with TickerProviderStateMixin {
     });
   }
 
-  Future<void> rippleReport() async {
+  Future<void> rippleReport(LatLng deviceLocation) async {
     for (int i = 0; i < 3; i++) {
-      animateRipple(deviceLocation!, _mapController, this);
+      animateRipple(deviceLocation, _mapController, this);
 
       await Future.delayed(
           const Duration(milliseconds: 2000));
     }
-
   }
 
 
@@ -176,8 +201,8 @@ class _MapWidgetState extends State<MapWidget> with TickerProviderStateMixin {
 
   void _updateDeviceCircle() {
     if (deviceCircle != null) {
-      _animateCircleMovement(
-          deviceCircle!.options.geometry as LatLng, deviceLocation!, deviceCircle!);
+      animateCircleMovement(
+          deviceCircle!.options.geometry as LatLng, deviceLocation!, deviceCircle!, _mapController, this);
     } else {
       _mapController
           .addCircle(CircleOptions(
@@ -196,8 +221,8 @@ class _MapWidgetState extends State<MapWidget> with TickerProviderStateMixin {
 
   void _updateDeviceJeep() {
     if (deviceSymbol != null) {
-      _animateSymbolMovement(
-          deviceSymbol!.options.geometry as LatLng, deviceLocation!, deviceSymbol!);
+      animateSymbolMovement(
+          deviceSymbol!.options.geometry as LatLng, deviceLocation!, deviceSymbol!, _mapController, this, _routeData, heading!);
     } else {
       _mapController
           .addSymbol(SymbolOptions(
@@ -218,30 +243,6 @@ class _MapWidgetState extends State<MapWidget> with TickerProviderStateMixin {
         .animateCamera(CameraUpdate.newLatLng(deviceLocation!));
   }
 
-  void _animateCircleMovement(LatLng from, LatLng to, Circle circle) {
-    final animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 500),
-    );
-    final animation = LatLngTween(begin: from, end: to).animate(CurvedAnimation(
-      parent: animationController,
-      curve: Curves.easeInOut,
-    ));
-
-    animation.addListener(() {
-      _mapController.updateCircle(
-          circle, CircleOptions(geometry: animation.value));
-    });
-
-    animation.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        animationController.dispose();
-      }
-    });
-
-    animationController.forward();
-  }
-
   void refreshLineAndPingLayer() {
     if (_routeData != null) {
       _mapController.clearLines();
@@ -254,40 +255,15 @@ class _MapWidgetState extends State<MapWidget> with TickerProviderStateMixin {
           )]
       );
       addGeojsonCluster(_mapController, _routeData!);
+      addGeojsonSOS(_mapController);
       listenToPingsFirestore();
+      listenToReportsFirestore();
     } else {
       _mapController.clearLines();
       pingListener.cancel();
       pings.clear();
       _mapController.setGeoJsonSource("pings", pingListToGeoJSON(pings));
     }
-  }
-
-  void _animateSymbolMovement(LatLng from, LatLng to, Symbol symbol) {
-    final animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 500),
-    );
-    final animation = LatLngTween(begin: from, end: to).animate(CurvedAnimation(
-      parent: animationController,
-      curve: Curves.easeInOut,
-    ));
-
-    _mapController.updateSymbol(
-        symbol, SymbolOptions(textRotate: heading! + 90, iconRotate: heading, textColor: _routeData != null? intToHexColor(_routeData!.routeColor):intToHexColor(Colors.grey.value)));
-
-    animation.addListener(() {
-      _mapController.updateSymbol(
-          symbol, SymbolOptions(geometry: animation.value));
-    });
-
-    animation.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        animationController.dispose();
-      }
-    });
-
-    animationController.forward();
   }
 
   @override
@@ -303,7 +279,6 @@ class _MapWidgetState extends State<MapWidget> with TickerProviderStateMixin {
         setState(() {
           mapLoaded = true;
         });
-        refreshLineAndPingLayer();
       },
       onStyleLoadedCallback: () async {
         await addImagesFromAsset(_mapController);
@@ -312,20 +287,16 @@ class _MapWidgetState extends State<MapWidget> with TickerProviderStateMixin {
         _mapController.setSymbolIconIgnorePlacement(true);
         _mapController.setSymbolTextIgnorePlacement(true);
         startListening();
+        refreshLineAndPingLayer();
+        await addGeojsonSOS(_mapController).then((value) => setState(() {
+          SOSLayerSetup = true;
+        }));
       },
       styleString: mapStyle,
       rotateGesturesEnabled: false,
       tiltGesturesEnabled: false,
     );
   }
-}
-
-class RippleTween extends Tween<double> {
-  RippleTween({required double begin, required double end})
-      : super(begin: begin, end: end);
-
-  @override
-  double lerp(double t) => lerpDouble(begin!, end!, t)!;
 }
 
 final GlobalKey<_MapWidgetState> mapWidgetKey = GlobalKey<_MapWidgetState>();

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
+import 'package:mapbox_gl/mapbox_gl.dart';
 import 'package:transitrack_driver/components/map_widget.dart';
 import 'package:transitrack_driver/models/jeep_driver_model.dart';
 import 'package:transitrack_driver/services/account_verification.dart';
@@ -24,6 +25,7 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
   late AccountData _driverAccount;
+  LatLng? deviceLocation;
   JeepData? driverJeep;
   RouteData? driverRoute;
 
@@ -170,9 +172,13 @@ class _DashboardPageState extends State<DashboardPage> {
 
           Expanded(
             child: MapWidget(
+              driverData: _driverAccount,
               key: mapWidgetKey,
               routeData: driverRoute,
               jeepLocation: (LocationData jeepLocation) {
+                setState(() {
+                  deviceLocation = LatLng(jeepLocation.latitude!, jeepLocation.longitude!);
+                });
                 try {
                   JeepData.updateJeepFirestore(driverJeep!.device_id, {
                     'location': GeoPoint(jeepLocation.latitude!, jeepLocation.longitude!),
@@ -422,9 +428,9 @@ class _DashboardPageState extends State<DashboardPage> {
                                         fit: BoxFit.cover),
                                     color: const Color(0xffC62828),
                                     function: () {
-                                      sendReport(context, JeepDriverData(jeepData: driverJeep!, driverData: _driverAccount), 1).then((value) {
-                                        if (value) {
-                                          mapWidgetKey.currentState?.rippleReport();
+                                      sendReport(context, JeepDriverData(jeepData: driverJeep!, driverData: _driverAccount), 3).then((value) {
+                                        if (value && deviceLocation != null) {
+                                          mapWidgetKey.currentState?.rippleReport(deviceLocation!);
                                         }
                                       });
                                     },
@@ -439,9 +445,9 @@ class _DashboardPageState extends State<DashboardPage> {
                                       fit: BoxFit.cover),
                                     color: const Color(0xffC62828),
                                     function: () {
-                                      sendReport(context, JeepDriverData(jeepData: driverJeep!, driverData: _driverAccount), 2).then((value) {
-                                        if (value) {
-                                          mapWidgetKey.currentState?.rippleReport();
+                                      sendReport(context, JeepDriverData(jeepData: driverJeep!, driverData: _driverAccount), 1).then((value) {
+                                        if (value && deviceLocation != null) {
+                                          mapWidgetKey.currentState?.rippleReport(deviceLocation!);
                                         }
                                       });
                                     },
@@ -456,9 +462,9 @@ class _DashboardPageState extends State<DashboardPage> {
                                       fit: BoxFit.cover),
                                     color: const Color(0xffC62828),
                                     function: () {
-                                      sendReport(context, JeepDriverData(jeepData: driverJeep!, driverData: _driverAccount), 3).then((value) {
-                                        if (value) {
-                                          mapWidgetKey.currentState?.rippleReport();
+                                      sendReport(context, JeepDriverData(jeepData: driverJeep!, driverData: _driverAccount), 2).then((value) {
+                                        if (value && deviceLocation != null) {
+                                          mapWidgetKey.currentState?.rippleReport(deviceLocation!);
                                         }
                                       });
                                     },

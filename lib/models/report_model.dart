@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:mapbox_gl/mapbox_gl.dart';
 
+import '../services/int_to_hex.dart';
+
 class ReportData {
   String report_id;
   String report_sender;
@@ -40,14 +42,15 @@ class ReportData {
     );
   }
 
-  static List<ReportDetails> reportDetails = [
-    ReportDetails(reportType: 'Lost Item', reportColors: Colors.lightBlue),
-    ReportDetails(reportType: 'Crime Incident', reportColors: Colors.red),
-    ReportDetails(
-        reportType: 'Mechanical Failure', reportColors: Colors.yellow),
-    ReportDetails(reportType: 'Accident', reportColors: Colors.orange),
-    ReportDetails(reportType: 'Other Concerns', reportColors: Colors.lightBlue),
-  ];
+  Map<String, dynamic> toGeoJSONFeature() {
+    return {
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [report_location.longitude, report_location.latitude]
+      },
+    };
+  }
 }
 
 class ReportDetails {
@@ -62,4 +65,77 @@ class ReportEntity {
   Circle reportCircle;
 
   ReportEntity({required this.reportData, required this.reportCircle});
+}
+
+reportListToGeoJSON(List<ReportData> SOSList) {
+  List<Map<String, dynamic>> features =
+  SOSList.map((SOS) => SOS.toGeoJSONFeature()).toList();
+
+  Map<String, dynamic> featureCollection = {
+    'type': 'FeatureCollection',
+    'features': features,
+  };
+
+  return featureCollection;
+}
+
+Future<void> addGeojsonSOS(MapboxMapController mapController) async {
+  double radius = 50;
+  mapController.removeLayer("accidents-icons");
+  mapController.removeSource("accidents");
+  mapController.removeLayer("crime-icons");
+  mapController.removeSource("crime");
+  mapController.removeLayer("mechError-icons");
+  mapController.removeSource("mechError");
+
+  mapController.addSource(
+      "mechError",
+      GeojsonSourceProperties(
+          data: reportListToGeoJSON([]), cluster: true, clusterRadius: radius));
+  mapController.addLayer(
+      "mechError",
+      "mechError-icons",
+      const SymbolLayerProperties(
+          iconImage: 'mechError',
+          textField: [Expressions.get, 'point_count_abbreviated'],
+          textAllowOverlap: true,
+          iconAllowOverlap: true,
+          textOffset: [0, 50],
+          textFont: ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+          textSize: 13,
+          iconSize: 0.12));
+
+  mapController.addSource(
+      "accidents",
+      GeojsonSourceProperties(
+          data: reportListToGeoJSON([]), cluster: true, clusterRadius: radius));
+  mapController.addLayer(
+      "accidents",
+      "accidents-icons",
+      const SymbolLayerProperties(
+          iconImage: 'accident',
+          iconAllowOverlap: true,
+          textField: [Expressions.get, 'point_count_abbreviated'],
+          textAllowOverlap: true,
+          textOffset: [0, 50],
+          textFont: ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+          textSize: 13,
+          iconSize: 0.12));
+
+  mapController.addSource(
+      "crime",
+      GeojsonSourceProperties(
+          data: reportListToGeoJSON([]), cluster: true, clusterRadius: radius));
+  mapController.addLayer(
+      "crime",
+      "crime-icons",
+      const SymbolLayerProperties(
+          iconImage: 'crime',
+          textField: [Expressions.get, 'point_count_abbreviated'],
+          textAllowOverlap: true,
+          iconAllowOverlap: true,
+          textOffset: [0, 50],
+          textFont: ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+          textSize: 13,
+          iconSize: 0.12));
 }

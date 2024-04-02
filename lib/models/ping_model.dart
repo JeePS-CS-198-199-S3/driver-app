@@ -78,9 +78,9 @@ Future<void> addGeojsonCluster(MapboxMapController mapController, RouteData rout
             Expressions.step,
             [Expressions.get, 'point_count'],
             20,
-            100,
+            5,
             30,
-            750,
+            10,
             40
           ]));
   mapController
