@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:transitrack_driver/components/drawer/account_widget.dart';
 import 'package:transitrack_driver/models/account_model.dart';
 
+import '../models/route_model.dart';
 import '../style/constants.dart';
 
 class DrawerWidget extends StatelessWidget {
   AccountData? accountData;
-  DrawerWidget({super.key, required this.accountData});
+  RouteData? route;
+  DrawerWidget({super.key, required this.accountData, required this.route});
 
   void signUserOut() {
     FirebaseAuth.instance.signOut();
@@ -32,7 +34,7 @@ class DrawerWidget extends StatelessWidget {
                 const SizedBox(height: Constants.defaultPadding),
                 const Divider(color: Colors.white),
                 const SizedBox(height: Constants.defaultPadding),
-                AccountStream(user: accountData, route: accountData!.route_id),
+                AccountStream(user: accountData, route: route),
                 const SizedBox(height: Constants.defaultPadding),
                 ListTile(
                   leading: const Icon(

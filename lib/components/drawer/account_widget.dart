@@ -1,6 +1,7 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import '../../models/account_model.dart';
+import '../../models/route_model.dart';
 import '../../style/constants.dart';
 import '../primary_text.dart';
 import 'account_settings.dart';
@@ -8,7 +9,7 @@ import 'account_settings.dart';
 class AccountStream extends StatefulWidget {
   AccountData? user;
   String? admin;
-  int route;
+  RouteData? route;
   AccountStream(
       {super.key,
         required this.user,
@@ -63,7 +64,9 @@ class _AccountStreamState extends State<AccountStream> {
                             context: context,
                             dialogType: DialogType.noHeader,
                           body: AccountSettings(
-                              account: widget.user!),
+                            account: widget.user!,
+                            route: widget.route,
+                          ),
                         ).show();
                       },
                       child: const Icon(Icons.settings, color: Colors.white))

@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import '../components/drawer_widget.dart';
 import '../menu_controller.dart';
 import '../models/account_model.dart';
+import '../models/route_model.dart';
 import '../style/constants.dart';
 import 'dashboard_page.dart';
 
@@ -24,11 +25,20 @@ class _HomePageState extends State<HomePage> {
   // Local user from firestore
   AccountData? currentUserFirestore;
   late StreamSubscription userFirestoreStream;
+  RouteData? route;
 
   @override
   void initState() {
     super.initState();
     listenToUserFirestore();
+  }
+
+  void fetchRoutes() async {
+    var data = await RouteData.fetchRoutes();
+
+    setState(() {
+      route = data!.firstWhere((element) => element.routeId == currentUserFirestore!.route_id);
+    });
   }
 
   void listenToUserFirestore() {
@@ -41,6 +51,7 @@ class _HomePageState extends State<HomePage> {
         setState(() {
           currentUserFirestore = AccountData.fromSnapshot(snapshot.docs.first);
         });
+        fetchRoutes();
       }
     });
   }
@@ -56,7 +67,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
         backgroundColor: Constants.bgColor,
         key: context.read<MenuControllers>().scaffoldKey,
-        drawer: DrawerWidget(accountData: currentUserFirestore),
+        drawer: DrawerWidget(accountData: currentUserFirestore, route: route),
         body: currentUserFirestore != null
             ? DashboardPage(driverAccount: currentUserFirestore!)
             : const Center(child: CircularProgressIndicator())

@@ -1,7 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../models/account_model.dart';
+import '../../models/route_model.dart';
 import '../../style/constants.dart';
 import '../button.dart';
 import '../primary_text.dart';
@@ -9,17 +11,16 @@ import '../text_field.dart';
 
 class AccountSettings extends StatelessWidget {
   final AccountData account;
-  const AccountSettings({super.key, required this.account});
+  final RouteData? route;
+  const AccountSettings({super.key, required this.account, required this.route});
 
   @override
   Widget build(BuildContext context) {
     final nameController = TextEditingController();
-    final emailController = TextEditingController();
     final passwordController = TextEditingController();
     final confirmPasswordController = TextEditingController();
 
     nameController.text = account.account_name;
-    emailController.text = account.account_email!;
 
     void errorMessage(String message) {
       showDialog(
@@ -33,6 +34,34 @@ class AccountSettings extends StatelessWidget {
                       style: const TextStyle(color: Colors.white),
                     )));
           });
+    }
+
+    Future<void> deleteAcc() async {
+      // Delete the user account in Firebase Authentication
+      try {
+        await FirebaseAuth.instance.currentUser!.delete();
+        print('User account deleted successfully.');
+      } catch (e) {
+        print('Error deleting user account: $e');
+        // Handle the error as needed
+      }
+
+      // Delete the corresponding document in Firestore
+      try {
+        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+            .collection('accounts')
+            .where('account_email', isEqualTo: account.account_email)
+            .get();
+        if (querySnapshot.docs.isNotEmpty) {
+          await querySnapshot.docs.first.reference.delete();
+          print('Firestore document deleted successfully.');
+        } else {
+          print('No document found with the specified email: ${account.account_email}');
+        }
+      } catch (e) {
+        print('Error deleting Firestore document: $e');
+        // Handle the error as needed
+      }
     }
 
     void update() async {
@@ -52,17 +81,10 @@ class AccountSettings extends StatelessWidget {
           AccountData.updateAccountFirestore(account.account_email, newAccountSettings);
         }
 
-        if (emailController.text != account.account_email ||
-            (passwordController.text != "" &&
-                passwordController.text == confirmPasswordController.text)) {
-          Map<String, dynamic> newAccountSettings = {
-            'account_email': emailController.text,
-          };
-
-          AccountData.updateAccountFirestore(account.account_email, newAccountSettings);
-
+        if (passwordController.text != "" &&
+                passwordController.text == confirmPasswordController.text) {
           AccountData.updateEmailAndPassword(
-              emailController.text, passwordController.text)
+              account.account_email, passwordController.text)
               .then((value) => FirebaseAuth.instance.signOut());
         }
 
@@ -95,11 +117,24 @@ class AccountSettings extends StatelessWidget {
             ],
           ),
           const SizedBox(height: Constants.defaultPadding),
-          InputTextField(
-            controller: emailController,
-            hintText: "Email",
-            obscureText: false,
-            enabled: false,
+          Container(
+            width: double.maxFinite,
+            padding: const EdgeInsets.symmetric(horizontal: Constants.defaultPadding/2, vertical: Constants.defaultPadding + 2.5),
+            decoration: BoxDecoration(
+              color: Constants.secondaryColor,
+              borderRadius: BorderRadius.circular(3),
+            ),
+            child: Text(account.account_email, style: TextStyle(fontSize: 15),),
+          ),
+          const SizedBox(height: Constants.defaultPadding),
+          Container(
+            width: double.maxFinite,
+            padding: const EdgeInsets.symmetric(horizontal: Constants.defaultPadding/2, vertical: Constants.defaultPadding + 2.5),
+            decoration: BoxDecoration(
+              color: Constants.secondaryColor,
+              borderRadius: BorderRadius.circular(3),
+            ),
+            child: Text(route?.routeName ?? "Loading Route", style: TextStyle(fontSize: 15),),
           ),
           const SizedBox(height: Constants.defaultPadding),
           InputTextField(
@@ -120,9 +155,23 @@ class AccountSettings extends StatelessWidget {
               text: "Email and password changes will log you out.",
               color: Colors.white),
           const SizedBox(height: Constants.defaultPadding * 2),
-          Button(
-            onTap: update,
-            widget: const Text("Save")
+          Row(
+            children: [
+              Expanded(
+                child: Button(
+                    onTap: deleteAcc,
+                    widget: const Text("Delete"),
+                  color: Colors.red,
+                ),
+              ),
+              const SizedBox(width: Constants.defaultPadding),
+              Expanded(
+                child: Button(
+                    onTap: update,
+                    widget: const Text("Save")
+                ),
+              ),
+            ],
           ),
         ],
       ),

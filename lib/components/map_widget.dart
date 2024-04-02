@@ -34,12 +34,12 @@ class _MapWidgetState extends State<MapWidget> with TickerProviderStateMixin {
   late MapboxMapController _mapController;
 
   // Ping Fetching
-  late StreamSubscription pingListener;
+  StreamSubscription? pingListener;
   List<PingData> pings = [];
   late Timer timer;
 
   // SOS Fetching
-  late StreamSubscription SOSListener;
+  StreamSubscription? SOSListener;
   List<ReportData> SOSList = [];
   bool SOSLayerSetup = false;
 
@@ -89,8 +89,8 @@ class _MapWidgetState extends State<MapWidget> with TickerProviderStateMixin {
   void dispose() {
     _mapController.dispose();
     locationListener.cancel();
-    pingListener.cancel();
-    SOSListener.cancel();
+    pingListener?.cancel();
+    SOSListener?.cancel();
     timer.cancel();
     super.dispose();
   }
@@ -143,7 +143,7 @@ class _MapWidgetState extends State<MapWidget> with TickerProviderStateMixin {
         }
       });
     } else {
-      SOSListener.cancel();
+      SOSListener?.cancel();
       SOSList.clear();
       _mapController.setGeoJsonSource("SOS-accidents", reportListToGeoJSON([]));
     }
@@ -260,7 +260,7 @@ class _MapWidgetState extends State<MapWidget> with TickerProviderStateMixin {
       listenToReportsFirestore();
     } else {
       _mapController.clearLines();
-      pingListener.cancel();
+      pingListener?.cancel();
       pings.clear();
       _mapController.setGeoJsonSource("pings", pingListToGeoJSON(pings));
     }
