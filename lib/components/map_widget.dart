@@ -190,15 +190,6 @@ class _MapWidgetState extends State<MapWidget> with TickerProviderStateMixin {
     }
   }
 
-
-  void startListening() async
-  {
-    // TODO IMPLEMENT ERROR HANDLING
-    await requestLocationPermission();
-
-    _listenDeviceLocation();
-  }
-
   void _updateDeviceCircle() {
     if (deviceCircle != null) {
       animateCircleMovement(
@@ -283,16 +274,17 @@ class _MapWidgetState extends State<MapWidget> with TickerProviderStateMixin {
         });
       },
       onStyleLoadedCallback: () async {
+
         await addImagesFromAsset(_mapController);
         _mapController.setSymbolIconAllowOverlap(true);
         _mapController.setSymbolTextAllowOverlap(true);
         _mapController.setSymbolIconIgnorePlacement(true);
         _mapController.setSymbolTextIgnorePlacement(true);
-        startListening();
         refreshLineAndPingLayer();
         await addGeojsonSOS(_mapController).then((value) => setState(() {
           SOSLayerSetup = true;
         }));
+        _listenDeviceLocation();
       },
       styleString: mapStyle,
     );

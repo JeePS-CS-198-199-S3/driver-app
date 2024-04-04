@@ -51,7 +51,9 @@ class _HomePageState extends State<HomePage> {
         setState(() {
           currentUserFirestore = AccountData.fromSnapshot(snapshot.docs.first);
         });
-        fetchRoutes();
+        if (currentUserFirestore != null) {
+          fetchRoutes();
+        }
       }
     });
   }
