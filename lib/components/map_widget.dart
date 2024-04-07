@@ -61,7 +61,7 @@ class _MapWidgetState extends State<MapWidget> with TickerProviderStateMixin {
 
     location.changeSettings(
       accuracy: LocationAccuracy.high,
-      distanceFilter: 5,
+      distanceFilter: 10,
     );
 
     setState(() {

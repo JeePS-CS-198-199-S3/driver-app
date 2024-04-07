@@ -28,7 +28,7 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
   late AccountData _driverAccount;
-  LatLng? deviceLocation;
+  LocationData? deviceLocation;
 
   JeepData? driverJeep;
 
@@ -209,16 +209,36 @@ class _DashboardPageState extends State<DashboardPage> {
               routeData: driverRoute,
               jeepLocation: (LocationData jeepLocation) {
                 setState(() {
-                  deviceLocation = LatLng(jeepLocation.latitude!, jeepLocation.longitude!);
+                  deviceLocation = jeepLocation;
                 });
                 try {
                   JeepData.updateJeepFirestore(driverJeep!.device_id, {
-                    'location': GeoPoint(jeepLocation.latitude!, jeepLocation.longitude!),
-                    'bearing': jeepLocation.heading,
+                    'location': GeoPoint(deviceLocation!.latitude!, deviceLocation!.longitude!),
+                    'bearing': deviceLocation!.heading,
                     'passenger_count': passengers,
                     'timestamp': FieldValue.serverTimestamp()
                   });
                 } catch (e) {
+                  print("Error: ${e.toString()}");
+                }
+
+                try {
+                  // Add a new document with auto-generated ID
+                  FirebaseFirestore.instance
+                      .collection('jeeps_historical')
+                      .add({
+                    'location': GeoPoint(jeepLocation.latitude!, jeepLocation.longitude!),
+                    'bearing': jeepLocation.heading,
+                    'passenger_count': passengers,
+                    'timestamp': FieldValue.serverTimestamp(),
+                    'device_id': driverJeep!.device_id,
+                    'max_capacity': driverJeep!.max_capacity,
+                    'route_id': driverJeep!.route_id,
+                    'driver': _driverAccount.account_name,
+                    'is_operating': true
+                  });
+                } catch (e) {
+                  // pop loading circle
                   print("Error: ${e.toString()}");
                 }
               }
@@ -441,6 +461,25 @@ class _DashboardPageState extends State<DashboardPage> {
                               setState(() {
                                 operateModeChoice = 2;
                               });
+                              try {
+                                // Add a new document with auto-generated ID
+                                FirebaseFirestore.instance
+                                    .collection('jeeps_historical')
+                                    .add({
+                                  'location': GeoPoint(deviceLocation!.latitude!, deviceLocation!.longitude!),
+                                  'bearing': deviceLocation!.heading!,
+                                  'passenger_count': passengers,
+                                  'timestamp': FieldValue.serverTimestamp(),
+                                  'device_id': driverJeep!.device_id,
+                                  'max_capacity': driverJeep!.max_capacity,
+                                  'route_id': driverJeep!.route_id,
+                                  'driver': _driverAccount.account_name,
+                                  'is_operating': false
+                                });
+                              } catch (e) {
+                                // pop loading circle
+                                print("Error: ${e.toString()}");
+                              }
                               updateDriverJeep(widget.driverAccount.account_email, {'jeep_driving': ""});
                             },
                             enabled: widget.driverAccount.jeep_driving != ""
@@ -456,7 +495,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                     function: () {
                                       sendReport(context, JeepDriverData(jeepData: driverJeep!, driverData: _driverAccount), 3).then((value) {
                                         if (value && deviceLocation != null) {
-                                          mapWidgetKey.currentState?.rippleReport(deviceLocation!);
+                                          mapWidgetKey.currentState?.rippleReport(LatLng(deviceLocation!.latitude!, deviceLocation!.longitude!));
                                         }
                                       });
                                     },
@@ -473,7 +512,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                     function: () {
                                       sendReport(context, JeepDriverData(jeepData: driverJeep!, driverData: _driverAccount), 1).then((value) {
                                         if (value && deviceLocation != null) {
-                                          mapWidgetKey.currentState?.rippleReport(deviceLocation!);
+                                          mapWidgetKey.currentState?.rippleReport(LatLng(deviceLocation!.latitude!, deviceLocation!.longitude!));
                                         }
                                       });
                                     },
@@ -490,7 +529,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                     function: () {
                                       sendReport(context, JeepDriverData(jeepData: driverJeep!, driverData: _driverAccount), 2).then((value) {
                                         if (value && deviceLocation != null) {
-                                          mapWidgetKey.currentState?.rippleReport(deviceLocation!);
+                                          mapWidgetKey.currentState?.rippleReport(LatLng(deviceLocation!.latitude!, deviceLocation!.longitude!));
                                         }
                                       });
                                     },
