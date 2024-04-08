@@ -322,7 +322,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                       ),
                                     ),
                                     TextSpan(
-                                      text: driverJeep != null && driverRoute != null? '\noperating' : "\na PUV",
+                                      text: driverJeep != null && driverRoute != null? '\npassengers' : "\na PUV",
                                       style: Theme.of(context)
                                           .textTheme
                                           .headline4
@@ -332,7 +332,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                         fontWeight:
                                         FontWeight
                                             .w600,
-                                        fontSize: 15,
+                                        fontSize: 13,
                                       ),
                                     ),
                                   ],
