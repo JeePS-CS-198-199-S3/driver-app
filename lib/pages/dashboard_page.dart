@@ -257,8 +257,14 @@ class _DashboardPageState extends State<DashboardPage> {
                       startDegreeOffset: -180,
                       sections: [
                         PieChartSectionData(
-                          color: driverJeep != null && driverRoute != null? Color(driverRoute!.routeColor) : Colors.grey.withOpacity(0.3),
+                          color: Color(driverRoute!.routeColor),
                           value: passengers.toDouble(),
+                          showTitle: false,
+                          radius: 10,
+                        ),
+                        PieChartSectionData(
+                          color: Colors.grey.withOpacity(0.1),
+                          value: driverJeep!.max_capacity - passengers.toDouble(),
                           showTitle: false,
                           radius: 10,
                         ),
