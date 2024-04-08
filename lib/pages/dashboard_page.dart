@@ -248,7 +248,7 @@ class _DashboardPageState extends State<DashboardPage> {
             height: 250,
             child: Stack(
               children: [
-                if (operateModeChoice == 2)
+                if (operateModeChoice == 2 && driverJeep != null && driverRoute != null)
                   PieChart(
                     swapAnimationDuration: Duration.zero,
                     PieChartData(
@@ -258,20 +258,13 @@ class _DashboardPageState extends State<DashboardPage> {
                       sections: [
                         PieChartSectionData(
                           color: driverJeep != null && driverRoute != null? Color(driverRoute!.routeColor) : Colors.grey.withOpacity(0.3),
-                          value: driverJeep != null && driverRoute != null? passengers.toDouble() : 10,
-                          showTitle: false,
-                          radius: 10,
-                        ),
-                        PieChartSectionData(
-                          color: driverJeep != null && driverRoute != null? Color(driverRoute!.routeColor) : Colors.grey.withOpacity(0.5)
-                              .withOpacity(0.1),
-                          value: driverJeep != null && driverRoute != null? driverJeep!.max_capacity - passengers.toDouble() : 0,
+                          value: passengers.toDouble(),
                           showTitle: false,
                           radius: 10,
                         ),
                         PieChartSectionData(
                           color: Colors.transparent,
-                          value: driverJeep != null && driverRoute != null? driverJeep!.max_capacity.toDouble(): 10,
+                          value: driverJeep!.max_capacity.toDouble(),
                           showTitle: false,
                           radius: 10,
                         ),
