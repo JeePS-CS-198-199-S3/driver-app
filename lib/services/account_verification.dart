@@ -4,7 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:transitrack_driver/models/account_model.dart';
 
 void checkAccountType(BuildContext context, AccountData driverAccount) {
-  if (driverAccount.account_type != 1) {
+  if (driverAccount.account_type == 0) {
     Future.delayed(const Duration(seconds: 1), () {
       AwesomeDialog(
         context: context,
