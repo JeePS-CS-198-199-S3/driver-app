@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:location/location.dart';
 import 'package:mapbox_gl/mapbox_gl.dart';
 import 'package:transitrack_driver/components/map_widget.dart';
@@ -84,6 +85,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
   void fetchJeep() async {
     if (_driverAccount.jeep_driving != "") {
+
       JeepData? jeepData = await fetchJeepData(_driverAccount.jeep_driving!);
 
       if (jeepData != null) {
@@ -91,6 +93,8 @@ class _DashboardPageState extends State<DashboardPage> {
           driverJeep = jeepData;
           passengers = driverJeep!.passenger_count;
         });
+
+        FlutterBackgroundService().startService();
 
         if (passengers == -2) {
           setState(() {
@@ -111,6 +115,8 @@ class _DashboardPageState extends State<DashboardPage> {
         setState(() {
           driverJeep = null;
         });
+
+        FlutterBackgroundService().invoke("stopService");
       }
     } else {
       setState(() {
@@ -118,6 +124,7 @@ class _DashboardPageState extends State<DashboardPage> {
         routeListener?.cancel();
         driverRoute = null;
       });
+      FlutterBackgroundService().invoke("stopService");
     }
   }
 
