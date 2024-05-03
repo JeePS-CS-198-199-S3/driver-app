@@ -63,7 +63,7 @@ void onStart(ServiceInstance service) {
   flutterLocalPlugin.show(
       90,
       "You are currently operating. Drive safe!",
-      "To stop operating, eject from your PUV.",
+      "Please keep the app open to continue broadcasting.",
       const NotificationDetails(android: AndroidNotificationDetails("JeePS Driver App", "JeePS Driver App Service",
           ongoing: true, icon: "app_icon", importance: Importance.high)));
   
