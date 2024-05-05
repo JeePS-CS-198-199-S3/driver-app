@@ -9,7 +9,6 @@ import '../models/account_model.dart';
 import '../models/ping_model.dart';
 import '../models/report_model.dart';
 import '../models/route_model.dart';
-import '../services/device_location/request_permission.dart';
 import '../services/int_to_hex.dart';
 import '../services/mapbox.dart';
 import '../services/mapbox/add_image_assets.dart';
@@ -46,8 +45,7 @@ class _MapWidgetState extends State<MapWidget> with TickerProviderStateMixin {
   // Device Location
   late StreamSubscription<LocationData> locationListener;
   Location location = Location();
-  LatLng? deviceLocation;
-  double? heading;
+  LocationData? deviceLocation;
   Circle? deviceCircle;
   Symbol? deviceSymbol;
 
@@ -61,8 +59,7 @@ class _MapWidgetState extends State<MapWidget> with TickerProviderStateMixin {
 
     location.changeSettings(
       accuracy: LocationAccuracy.high,
-      distanceFilter: 20,
-      interval: 10000
+      interval: 7500
     );
 
     setState(() {
@@ -112,6 +109,7 @@ class _MapWidgetState extends State<MapWidget> with TickerProviderStateMixin {
             _mapController.removeCircle(deviceCircle!);
             deviceCircle = null;
           }
+          widget.jeepLocation(deviceLocation!);
           _updateDeviceJeep();
         } else {
           if (deviceSymbol != null) {
@@ -169,8 +167,7 @@ class _MapWidgetState extends State<MapWidget> with TickerProviderStateMixin {
   void _listenDeviceLocation() {
     locationListener = location.onLocationChanged.listen((LocationData currentLocation) {
       setState(() {
-        deviceLocation = LatLng(currentLocation.latitude!, currentLocation.longitude!);
-        heading = currentLocation.heading!;
+        deviceLocation = currentLocation;
       });
 
       if (_routeData != null) {
@@ -194,11 +191,11 @@ class _MapWidgetState extends State<MapWidget> with TickerProviderStateMixin {
   void _updateDeviceCircle() {
     if (deviceCircle != null) {
       animateCircleMovement(
-          deviceCircle!.options.geometry as LatLng, deviceLocation!, deviceCircle!, _mapController, this);
+          deviceCircle!.options.geometry as LatLng, LatLng(deviceLocation!.latitude!, deviceLocation!.longitude!), deviceCircle!, _mapController, this);
     } else {
       _mapController
           .addCircle(CircleOptions(
-          geometry: deviceLocation,
+          geometry: LatLng(deviceLocation!.latitude!, deviceLocation!.longitude!),
           circleRadius: 3,
           circleColor: '#FFFFFF',
           circleStrokeWidth: 2,
@@ -208,31 +205,31 @@ class _MapWidgetState extends State<MapWidget> with TickerProviderStateMixin {
       });
     }
     _mapController
-        .animateCamera(CameraUpdate.newLatLng(deviceLocation!));
+        .animateCamera(CameraUpdate.newLatLng(LatLng(deviceLocation!.latitude!, deviceLocation!.longitude!)));
   }
 
   void _updateDeviceJeep() {
     if (deviceSymbol != null) {
       animateSymbolMovement(
-          deviceSymbol!.options.geometry as LatLng, deviceLocation!, deviceSymbol!, _mapController, this, _routeData, heading!);
+          deviceSymbol!.options.geometry as LatLng, LatLng(deviceLocation!.latitude!, deviceLocation!.longitude!), deviceSymbol!, _mapController, this, _routeData, deviceLocation!.heading!);
     } else {
       _mapController
           .addSymbol(SymbolOptions(
-          geometry: deviceLocation!,
+          geometry: LatLng(deviceLocation!.latitude!, deviceLocation!.longitude!),
           iconImage: "jeepTop",
           textField: "▬▬",
           textLetterSpacing: -0.35,
           textSize: 30,
           textColor: _routeData != null? intToHexColor(_routeData!.routeColor):intToHexColor(Colors.grey.value),
-          textRotate: heading! + 90,
-          iconRotate: heading,
+          textRotate: deviceLocation!.heading! + 90,
+          iconRotate: deviceLocation!.heading!,
           iconSize: 2))
           .then((jeepIcon) {
         deviceSymbol = jeepIcon;
       });
     }
     _mapController
-        .animateCamera(CameraUpdate.newLatLng(deviceLocation!));
+        .animateCamera(CameraUpdate.newLatLng(LatLng(deviceLocation!.latitude!, deviceLocation!.longitude!)));
   }
 
   void refreshLineAndPingLayer() {
