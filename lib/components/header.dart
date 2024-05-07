@@ -26,14 +26,20 @@ class Header extends StatelessWidget {
                 icon: const Icon(Icons.menu, size: 35)
             ),
             IconButton(
-                onPressed: () {
-                  AwesomeDialog(
+                onPressed: () => driverAccount.is_verified
+                    ? AwesomeDialog(
                       context: context,
                       keyboardAware: false,
                       dialogType: DialogType.noHeader,
                       body: JeepsListWidget(accountData: driverAccount)
-                  ).show();
-                },
+                  ).show()
+                    : AwesomeDialog(
+                  context: context,
+                  dialogType: DialogType.error,
+                  animType: AnimType.scale,
+                  desc: 'This app is only intended for verified JeePS drivers. Contact your route manager for account verification.',
+                ).show()
+                ,
                 icon: const Text("PUV LIST"),
                 iconSize: 17,
                 visualDensity: VisualDensity.compact,

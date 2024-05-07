@@ -59,9 +59,9 @@ class _RegisterPageState extends State<RegisterPage> {
         // check if password is confirmed
         if (passwordController.text == confirmPasswordController.text) {
            if (routes != null && chosenRoute != null) {
-             
              await FirebaseAuth.instance.createUserWithEmailAndPassword(
                  email: emailController.text, password: passwordController.text).then((value) async {
+               Navigator.pop(context);
                await FirebaseFirestore.instance
                    .collection('accounts')
                    .add({
@@ -73,7 +73,7 @@ class _RegisterPageState extends State<RegisterPage> {
                  'route_id': routes!.firstWhere((element) =>
                  element.routeName == chosenRoute!).routeId,
                });
-             }).then((_) => Navigator.pop(context));
+             });
            } else {
              // password dont match
              errorMessage("Select a route you wish to associate to.");

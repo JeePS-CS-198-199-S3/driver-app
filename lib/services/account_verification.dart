@@ -14,15 +14,5 @@ void checkAccountType(BuildContext context, AccountData driverAccount) {
         onDismissCallback: (_) => FirebaseAuth.instance.signOut(),
       ).show();
     });
-  } else if (!driverAccount.is_verified) {
-    Future.delayed(const Duration(seconds: 1), () {
-      AwesomeDialog(
-        context: context,
-        dialogType: DialogType.error,
-        animType: AnimType.scale,
-        desc: 'This app is only intended for verified JeePS drivers. Contact your route manager for account verification.',
-        onDismissCallback: (_) => FirebaseAuth.instance.signOut(),
-      ).show();
-    });
   }
 }
