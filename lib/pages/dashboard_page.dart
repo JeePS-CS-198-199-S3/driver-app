@@ -198,12 +198,12 @@ class _DashboardPageState extends State<DashboardPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text("Regular Fare: ${driverRoute != null? "₱ ${driverRoute!.routeFare}" : "NA"}", style: const TextStyle(fontSize: 10)),
+                  Text("Regular Fare: ${driverRoute != null? "Php ${driverRoute!.routeFare}" : "NA"}", style: const TextStyle(fontSize: 10)),
 
                   if (driverRoute != null)
                   Text(formatTime(driverRoute!.routeTime), style: const TextStyle(fontSize: 10)),
 
-                  Text("Discounted: ${driverRoute != null? "₱ ${driverRoute!.routeFareDiscounted}" : "NA"}", style: const TextStyle(fontSize: 10))
+                  Text("Discounted: ${driverRoute != null? "Php ${driverRoute!.routeFareDiscounted}" : "NA"}", style: const TextStyle(fontSize: 10))
                 ]
               ),
             )
