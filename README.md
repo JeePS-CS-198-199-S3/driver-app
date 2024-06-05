@@ -1,6 +1,6 @@
 # JeePS Driver App
 
-## Getting Started
+## Installation Guide
 
 There is a "Jeeps Driver App.apk" file in the Google Drive. Copy it to your Android Device. Make sure your Android version is 7 and above.
 
