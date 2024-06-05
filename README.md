@@ -2,7 +2,7 @@
 
 ## Getting Started
 
-There is a .apk file in this repository. Copy it to your Android Device. Make sure your Android version is 7 and above.
+There is a "Jeeps Driver App.apk" file in the Google Drive. Copy it to your Android Device. Make sure your Android version is 7 and above.
 
 After installation, make sure to enable location permissions. That's all! 
 
