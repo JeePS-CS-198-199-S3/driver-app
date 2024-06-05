@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+// Legacy Code, for creating new accounts
+
 class AuthService {
   void createUserDocument(User? user) async {
     if (user != null) {

@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:transitrack_driver/pages/register_page.dart';
 import 'login_page.dart';
 
+// Login/Register Page Toggle
+
 class LoginOrRegisterPage extends StatefulWidget {
   const LoginOrRegisterPage({super.key});
 

@@ -1,3 +1,5 @@
+// Auxiliary App to convert Integer to Hex
+
 String intToHexColor(int colorValue) {
   String hexColor = colorValue.toRadixString(16).toUpperCase();
   // Take only the leftmost 6 hex digits

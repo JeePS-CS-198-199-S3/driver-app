@@ -19,6 +19,8 @@ import '../services/format_time.dart';
 import '../services/send_report.dart';
 import '../style/constants.dart';
 
+// Main Page of the App
+
 class DashboardPage extends StatefulWidget {
   final AccountData driverAccount;
   const DashboardPage({super.key, required this.driverAccount});

@@ -32,8 +32,9 @@ void main() async {
 }
 
 Future<void> initService() async {
-  var service = FlutterBackgroundService();
 
+  // For background services
+  var service = FlutterBackgroundService();
   await flutterLocalPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()?.createNotificationChannel(notificationChannel);
 
   await service.configure(

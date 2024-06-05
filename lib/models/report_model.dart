@@ -4,14 +4,16 @@ import 'package:mapbox_gl/mapbox_gl.dart';
 
 import '../services/int_to_hex.dart';
 
+// Report Model.
+
 class ReportData {
   String report_id;
-  String report_sender;
-  String report_recepient;
-  String report_jeepney;
+  String report_sender; // email of report issuer
+  String report_recepient; // email for driver
+  String report_jeepney; // puv plate number
   Timestamp timestamp;
   String report_content;
-  int report_type;
+  int report_type; // 0 for lost items, 1 for crime incidents, 2 for mechanical failure, 3 for accidents, 4 for other concerns
   GeoPoint report_location;
   int report_route;
 

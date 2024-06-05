@@ -6,6 +6,8 @@ import 'package:transitrack_driver/models/account_model.dart';
 import '../models/route_model.dart';
 import '../style/constants.dart';
 
+// Contains all the elements in the left drawer
+
 class DrawerWidget extends StatelessWidget {
   AccountData? accountData;
   RouteData? route;

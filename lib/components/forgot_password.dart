@@ -8,6 +8,9 @@ import '../style/constants.dart';
 import 'button.dart';
 import 'text_field.dart';
 
+// This widget handles the password reset process
+
+
 class ForgotPassword extends StatefulWidget {
   const ForgotPassword({super.key});
 

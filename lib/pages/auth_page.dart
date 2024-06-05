@@ -7,6 +7,8 @@ import '../services/device_location/request_permission.dart';
 import 'home_page.dart';
 import 'login_or_register_page.dart';
 
+// Checks if GPS is Enabled
+
 class AuthPage extends StatefulWidget {
   const AuthPage({super.key});
 

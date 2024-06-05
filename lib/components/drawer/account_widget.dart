@@ -6,6 +6,9 @@ import '../../style/constants.dart';
 import '../primary_text.dart';
 import 'account_settings.dart';
 
+// This widget listens whether there is a logged in account or not.
+
+
 class AccountStream extends StatefulWidget {
   AccountData? user;
   String? admin;

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../style/constants.dart';
 
+// Handy Multi-purpose Button Widget
+
 class Button extends StatelessWidget {
 
   final Function()? onTap;

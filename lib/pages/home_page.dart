@@ -12,6 +12,8 @@ import '../models/route_model.dart';
 import '../style/constants.dart';
 import 'dashboard_page.dart';
 
+// Waits for the User Information and Displays teh Dashboard once loaded.
+
 class HomePage extends StatefulWidget {
   final User currentUserAuth;
   const HomePage({super.key, required this.currentUserAuth});

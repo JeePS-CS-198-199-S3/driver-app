@@ -1,18 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:transitrack_driver/models/jeep_driver_model.dart';
-import 'package:transitrack_driver/models/route_model.dart';
 
 import 'account_model.dart';
+
+// PUV Model
 
 class JeepData {
   String device_id;
   Timestamp timestamp;
-  int passenger_count;
+  int passenger_count; // -1 for passive broadcasting mode
   int max_capacity;
   GeoPoint location;
   int route_id;
-  double bearing;
+  double bearing; // rotation of PUV symbol (0-360)
 
   JeepData({
     required this.device_id,

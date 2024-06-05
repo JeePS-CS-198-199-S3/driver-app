@@ -7,6 +7,8 @@ import '../components/text_field.dart';
 import '../models/route_model.dart';
 import '../style/constants.dart';
 
+// Register Page
+
 class RegisterPage extends StatefulWidget {
   final Function()? onTap;
   const RegisterPage({super.key, required this.onTap});

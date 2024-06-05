@@ -6,6 +6,8 @@ import 'package:transitrack_driver/models/jeep_driver_model.dart';
 import '../components/square_loader.dart';
 import '../style/constants.dart';
 
+// Uploads a new document in Reports collection once called
+
 Future<bool> sendReport(BuildContext context, JeepDriverData jeepDriverData, int reportType) async {
   // show loading circle
   Loader(context);

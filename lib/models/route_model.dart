@@ -1,16 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mapbox_gl/mapbox_gl.dart';
 
+// Route Model
+
 class RouteData {
   bool enabled;
   int routeColor;
   List<LatLng> routeCoordinates;
-  num routeFare;
-  num routeFareDiscounted;
+  double routeFare; // Regular Fare
+  double routeFareDiscounted; // for PWDs, Students, Senior Citizens
   int routeId;
   String routeName;
   List<int> routeTime;
-  bool isClockwise;
+  bool isClockwise; // if Route Coordinates are listed in clockwise/counterclockwise manner
+
 
   RouteData({
     required this.enabled,

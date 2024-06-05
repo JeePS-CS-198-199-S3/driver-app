@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:transitrack_driver/models/account_model.dart';
 
+// Shows prompt that app is only inteded for JeePS drivers once called.
+
 void checkAccountType(BuildContext context, AccountData driverAccount) {
   if (driverAccount.account_type == 0) {
     Future.delayed(const Duration(seconds: 1), () {

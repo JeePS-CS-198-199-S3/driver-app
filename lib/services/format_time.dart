@@ -1,3 +1,5 @@
+// Auxiliary app to format time
+
 String formatTime(List<int> times) {
   if (times[1] - times[0] == 1440) {
     return '24 hours';

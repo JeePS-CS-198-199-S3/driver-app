@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 
 import '../style/constants.dart';
 
+// Legacy Widget, used like a text widget.
+
 class PrimaryText extends StatelessWidget {
   final double size;
   final FontWeight fontWeight;

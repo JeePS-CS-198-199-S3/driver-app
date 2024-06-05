@@ -9,6 +9,8 @@ import '../models/jeep_model.dart';
 import '../models/route_model.dart';
 import '../style/constants.dart';
 
+// Widget displaying all PUVs so the driver can select by long pressing.
+
 class JeepsListWidget extends StatefulWidget {
   AccountData accountData;
   JeepsListWidget({

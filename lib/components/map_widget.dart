@@ -17,6 +17,8 @@ import '../services/mapbox/animate_ripple.dart';
 import '../services/mapbox/animate_symbol_movement.dart';
 import '../services/mapbox/minute_old_checker.dart';
 
+// The only map widget for the driver app
+
 class MapWidget extends StatefulWidget {
   final AccountData driverData;
   final RouteData? routeData;
