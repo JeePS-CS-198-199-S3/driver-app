@@ -26,10 +26,10 @@ There are 3 different broadcast modes:
 - Semi-Active: Full/Available Options + Location is being broadcasted.
 - Full-Active: +/- Options + Location is being broadcasted.
 
-# How to Broadcast Reports
+## How to Broadcast Reports
 
 Just long press any of the three buttons on the bottom right corner of the dashboard for Accidents, Crime, and Mechanical Problems. Driver can only report a problem every 1 minute. Reports of other drivers/commuters will be visible on the driver's map for 1 minute.
 
-# How to Leave PUV
+## How to Leave PUV
 
 Simply long press the "Leave PUV" button on the bottom left corner of the screen.
